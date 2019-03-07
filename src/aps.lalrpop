@@ -1,0 +1,89 @@
+use std::str::FromStr;
+use aps_lib::ast::*;
+use aps_lib::aps_type::Type;
+
+
+grammar;
+
+pub Prog: Box<AstCdms> = {
+    <Block> => <>,
+};
+
+pub Block: Box<AstCdms> = {
+    "[" <CDMS> "]" => <>,
+};
+
+pub CDMS : Box<AstCdms> = {
+    <statement> => Box::new(AstCdms::FStat(<>)),
+    <dec:declaration> ";" <cdms:CDMS>=> Box::new( AstCdms::Dec(dec,cdms) ),
+    <st:statement> ";" <cdms:CDMS>=> Box::new( AstCdms::Stat(st,cdms) ),
+};
+
+pub TYPE : Type ={
+    <tprim>,
+    "(" <args:Asterisk<TYPE>> "->" <ret:TYPE> ")" => Type::Func(args,Box::new(ret)),
+};
+
+pub ARG: Arg = { 
+    <id:ident> ":" <t:TYPE> => Arg::new(&id,&t)  ,
+};
+
+
+pub declaration : Box<AstDec> = {
+    "CONST" <id:ident> <t:TYPE> <e:expr> => Box::new(AstDec::ASTConst(id,t,e)),
+    "FUN" <id:ident> <t:TYPE> "[" <a:Comma<ARG>> "]" <e:expr> =>Box::new(AstDec::ASTFunc(id,t,a,e)),
+    "FUN" "REC" <id:ident> <t:TYPE> "[" <a:Comma<ARG>> "]" <e:expr> =>Box::new(AstDec::ASTFuncRec(id,t,a,e)),
+    "VAR" <id:ident> <t:TYPE> => Box::new(AstDec::ASTVar(id,t)),
+    "PROC" <id:ident> "[" <a:Comma<ARG>> "]" <bl:Block> =>Box::new(AstDec::ASTProc(id,a,bl)),
+    "PROC" "REC" <id:ident> "[" <a:Comma<ARG>> "]" <bl:Block> =>Box::new(AstDec::ASTProcRec(id,a,bl)),
+};
+
+pub statement : Box<AstStat> = {
+    "ECHO" <expr> => Box::new(AstStat::ASTEcho(<>)),
+    "SET" <id:ident> <e:expr> => Box::new(AstStat::ASTSet(id,e)),
+    "IF" <e:expr> <then:Block> <els:Block> => Box::new(AstStat::ASTIf(e,then,els)),
+    "WHILE" <e:expr> <body:Block> => Box::new(AstStat::ASTWhile(e,body)),
+    "CALL" <id:ident> <es:Spaces<expr>> => Box::new(AstStat::ASTCall(id,es))
+};
+
+pub expr : Box<AstExp> = {
+    "true" => Box::new(AstExp::ASTBool(true)),
+    "false"=>Box::new(AstExp::ASTBool(false)),
+    <Num> => Box::new(AstExp::ASTInt(<>)),
+    <ident> => Box::new(AstExp::ASTIdent(<>)),
+    "(" "if" <e1:expr> <then:expr> <el:expr> ")"=> Box::new(AstExp::ASTIf(e1,then,el)),
+    "(" "not" <e1:expr> ")" =>  Box::new(AstExp::ASTUnPrim(UnOprim::Not,e1)),
+    "(" "and" <e1:expr> <e2:expr> ")" => Box::new(AstExp::ASTBinPrim(Oprim::And,e1,e2)),
+    "(" "or" <e1:expr> <e2:expr> ")" =>Box::new(AstExp::ASTBinPrim(Oprim::Or,e1,e2)),
+    "(" "eq" <e1:expr> <e2:expr> ")" =>Box::new(AstExp::ASTBinPrim(Oprim::Eq,e1,e2)),
+    "(" "lt" <e1:expr> <e2:expr> ")" =>Box::new(AstExp::ASTBinPrim(Oprim::Lt,e1,e2)),
+    "(" "add" <e1:expr> <e2:expr> ")" =>Box::new(AstExp::ASTBinPrim(Oprim::Add,e1,e2)),
+    "(" "sub" <e1:expr> <e2:expr> ")" =>Box::new(AstExp::ASTBinPrim(Oprim::Sub,e1,e2)),
+    "(" "mul" <e1:expr>  <e2:expr> ")" =>Box::new(AstExp::ASTBinPrim(Oprim::Mul,e1,e2)),
+    "(" "div" <e1:expr> <e2:expr> ")" =>Box::new(AstExp::ASTBinPrim(Oprim::Div,e1,e2)),
+    "[" <a:Comma<ARG>>  "]" <expr:expr> =>Box::new(AstExp::ASTAbs(a,expr)),
+    "(" <e:expr> <es:Spaces<expr>> ")" =>Box::new(AstExp::ASTApp(e,es)),
+};
+
+pub tprim : Type = {
+    "int" => Type::Int,
+    "bool" => Type::Bool,
+    "void" => Type::Void,
+};
+
+Spaces<E>: Vec<E> =
+    <v0:(<E> " ")*> <e1:E?> =>
+v0.into_iter().chain(e1).collect();
+
+
+Comma<E>: Vec<E> =
+    <v0:(<E> ",")*> <e1:E?> =>
+v0.into_iter().chain(e1).collect();
+
+Asterisk<E>: Vec<E> =
+    <v0:(<E> "*")*> <e1:E?> =>
+v0.into_iter().chain(e1).collect();
+
+
+Num: i64={ r"(-)?[0-9]+" => i64::from_str(<>).unwrap()};
+ident :String=  r"[a-zA-Z]([a-zA-Z]|[0-9])*" => <>.to_string();
