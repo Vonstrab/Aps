@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::fmt::{Error, Formatter};
 
 use super::aps_type::Type;
@@ -47,7 +46,7 @@ pub enum AstExp {
     ASTIf(Box<AstExp>, Box<AstExp>, Box<AstExp>),
     ASTUnPrim(UnOprim, Box<AstExp>),
     ASTBinPrim(Oprim, Box<AstExp>, Box<AstExp>),
-    ASTApp(Box<AstExp>, Vec<Box<AstExp>>),
+    ASTApp(String, Vec<Box<AstExp>>),
     ASTAbs(Vec<Arg>, Box<AstExp>),
 }
 
@@ -226,7 +225,7 @@ impl AstExp {
                     }
                 }
                 exprs.push(']');
-                let s = format!("app({},{})", e1.to_prolog(), exprs);
+                let s = format!("app({},{})", e1, exprs);
                 out.push_str(s.as_str());
             }
         }

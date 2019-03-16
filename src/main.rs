@@ -88,13 +88,21 @@ fn test_prog(filename: String) {
     let mut code_reader = reader_from_file(&d);
     let mut code: String = String::new();
     let _ = code_reader.read_to_string(&mut code);
-    let ast = parser_ast.parse(&code);
     println!("Code :\n{}", code);
+
+    let ast = parser_ast.parse(&code);
+    if ast.is_err() {
+        println!("Erreur de parseur {:?}", ast);
+    }
     assert!(ast.is_ok());
     let past = ast.unwrap();
     println!("AST : {:?}", past);
     let type_res = test_type(&past);
+    if ! type_res {
+        println!("Erreur de type");
+    }
     assert!(type_res);
+    assert_eq!(vec![42],past.eval(&mut HashMap::new()) );
 }
 
 #[cfg(test)]

@@ -59,10 +59,10 @@ pub expr : Box<AstExp> = {
     "(" "lt" <e1:expr> <e2:expr> ")" =>Box::new(AstExp::ASTBinPrim(Oprim::Lt,e1,e2)),
     "(" "add" <e1:expr> <e2:expr> ")" =>Box::new(AstExp::ASTBinPrim(Oprim::Add,e1,e2)),
     "(" "sub" <e1:expr> <e2:expr> ")" =>Box::new(AstExp::ASTBinPrim(Oprim::Sub,e1,e2)),
-    "(" "mul" <e1:expr>  <e2:expr> ")" =>Box::new(AstExp::ASTBinPrim(Oprim::Mul,e1,e2)),
+    "(" "mul" <e1:expr> <e2:expr> ")" =>Box::new(AstExp::ASTBinPrim(Oprim::Mul,e1,e2)),
     "(" "div" <e1:expr> <e2:expr> ")" =>Box::new(AstExp::ASTBinPrim(Oprim::Div,e1,e2)),
     "[" <a:Comma<ARG>>  "]" <expr:expr> =>Box::new(AstExp::ASTAbs(a,expr)),
-    "(" <e:expr> <es:Spaces<expr>> ")" =>Box::new(AstExp::ASTApp(e,es)),
+    "(" <id:ident> <es:Spaces<expr>> ")" =>Box::new(AstExp::ASTApp(id,es)),
 };
 
 pub tprim : Type = {
@@ -72,9 +72,8 @@ pub tprim : Type = {
 };
 
 Spaces<E>: Vec<E> =
-    <v0:(<E> " ")*> <e1:E?> =>
+    <v0:(<E>" ")*> <e1:E?> =>
 v0.into_iter().chain(e1).collect();
-
 
 Comma<E>: Vec<E> =
     <v0:(<E> ",")*> <e1:E?> =>
@@ -86,4 +85,4 @@ v0.into_iter().chain(e1).collect();
 
 
 Num: i64={ r"(-)?[0-9]+" => i64::from_str(<>).unwrap()};
-ident :String=  r"[a-zA-Z]([a-zA-Z]|[0-9])*" => <>.to_string();
+ident :String=  r"([a-zA-Z])([a-zA-Z0-9])*" => <>.to_string();
