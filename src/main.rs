@@ -79,6 +79,7 @@ fn main() {
         }
     }
 }
+
 fn test_prog(filename: String, expected: &Vec<i64>) {
     let parser_ast = aps::ProgParser::new();
 
