@@ -74,12 +74,12 @@ fn main() {
             } else {
                 println!("Typage Correct!");
                 // println!("Evaluation :");
-                //    let eval = ast.eval(&mut HashMap::new());
+                //    let eval = ast.eval(&mut HashMap::new(),&mut Vec::new());
             }
         }
     }
 }
-fn test_prog(filename: String) {
+fn test_prog(filename: String, expected: &Vec<i64>) {
     let parser_ast = aps::ProgParser::new();
 
     let d = PathBuf::from(filename);
@@ -91,18 +91,13 @@ fn test_prog(filename: String) {
     println!("Code :\n{}", code);
 
     let ast = parser_ast.parse(&code);
-    if ast.is_err() {
-        println!("Erreur de parseur {:?}", ast);
-    }
-    assert!(ast.is_ok());
-    let past = ast.unwrap();
+    let past = ast.expect("Parser failure");
     println!("AST : {:?}", past);
     let type_res = test_type(&past);
-    if ! type_res {
-        println!("Erreur de type");
+    if !type_res {
+        panic!("Erreur de type");
     }
-    assert!(type_res);
-    assert_eq!(vec![42],past.eval(&mut HashMap::new()) );
+    assert_eq!(*expected, past.eval(&mut HashMap::new(), &mut Vec::new()));
 }
 
 #[cfg(test)]
@@ -113,92 +108,92 @@ mod aps0 {
 
     #[test]
     fn prog_000() {
-        test_prog("test/aps0/prog000.aps".to_string());
+        test_prog("test/aps0/prog000.aps".to_string(), &vec![42]);
     }
 
     #[test]
     fn prog_001() {
-        test_prog("test/aps0/prog001.aps".to_string());
+        test_prog("test/aps0/prog001.aps".to_string(), &vec![42]);
     }
 
     #[test]
     fn prog_002() {
-        test_prog("test/aps0/prog002.aps".to_string());
+        test_prog("test/aps0/prog002.aps".to_string(), &vec![42]);
     }
 
     #[test]
     fn prog_003() {
-        test_prog("test/aps0/prog003.aps".to_string());
+        test_prog("test/aps0/prog003.aps".to_string(), &vec![42]);
     }
 
     #[test]
     fn prog_004() {
-        test_prog("test/aps0/prog004.aps".to_string());
+        test_prog("test/aps0/prog004.aps".to_string(), &vec![42]);
     }
 
     #[test]
     fn prog_005() {
-        test_prog("test/aps0/prog005.aps".to_string());
+        test_prog("test/aps0/prog005.aps".to_string(), &vec![42]);
     }
 
     #[test]
     fn prog_006() {
-        test_prog("test/aps0/prog006.aps".to_string());
+        test_prog("test/aps0/prog006.aps".to_string(), &vec![42]);
     }
 
     #[test]
     fn prog_007() {
-        test_prog("test/aps0/prog007.aps".to_string());
+        test_prog("test/aps0/prog007.aps".to_string(), &vec![42]);
     }
 
     #[test]
     fn prog_008() {
-        test_prog("test/aps0/prog008.aps".to_string());
+        test_prog("test/aps0/prog008.aps".to_string(), &vec![42]);
     }
 
     #[test]
     fn prog_009() {
-        test_prog("test/aps0/prog009.aps".to_string());
+        test_prog("test/aps0/prog009.aps".to_string(), &vec![42]);
     }
 
     #[test]
     fn prog_010() {
-        test_prog("test/aps0/prog010.aps".to_string());
+        test_prog("test/aps0/prog010.aps".to_string(), &vec![42]);
     }
 
     #[test]
     fn prog_011() {
-        test_prog("test/aps0/prog011.aps".to_string());
+        test_prog("test/aps0/prog011.aps".to_string(), &vec![42]);
     }
 
     #[test]
     fn prog_012() {
-        test_prog("test/aps0/prog012.aps".to_string());
+        test_prog("test/aps0/prog012.aps".to_string(), &vec![42]);
     }
 
     #[test]
     fn prog_013() {
-        test_prog("test/aps0/prog013.aps".to_string());
+        test_prog("test/aps0/prog013.aps".to_string(), &vec![42]);
     }
 
     #[test]
     fn prog_014() {
-        test_prog("test/aps0/prog014.aps".to_string());
+        test_prog("test/aps0/prog014.aps".to_string(), &vec![42]);
     }
 
     #[test]
     fn prog_015() {
-        test_prog("test/aps0/prog015.aps".to_string());
+        test_prog("test/aps0/prog015.aps".to_string(), &vec![42]);
     }
 
     #[test]
     fn prog_016() {
-        test_prog("test/aps0/prog016.aps".to_string());
+        test_prog("test/aps0/prog016.aps".to_string(), &vec![42]);
     }
 
     #[test]
     fn prog_017() {
-        test_prog("test/aps0/prog017.aps".to_string());
+        test_prog("test/aps0/prog017.aps".to_string(), &vec![42]);
     }
 }
 
@@ -210,105 +205,107 @@ mod aps1 {
 
     #[test]
     fn prog_100() {
-        test_prog("test/aps1/prog100.aps".to_string());
+        test_prog("test/aps1/prog100.aps".to_string(), &vec![42]);
     }
 
     #[test]
-    fn parse_prog_101() {
-        test_prog("test/aps1/prog101.aps".to_string());
+    fn prog_101() {
+        test_prog("test/aps1/prog101.aps".to_string(), &vec![42]);
     }
 
     #[test]
-    fn parse_prog_102() {
-        test_prog("test/aps1/prog102.aps".to_string());
+    fn prog_102() {
+        test_prog("test/aps1/prog102.aps".to_string(), &vec![42]);
     }
 
     #[test]
-    fn parse_prog_103() {
-        test_prog("test/aps1/prog103.aps".to_string());
+    fn prog_103() {
+        test_prog("test/aps1/prog103.aps".to_string(), &vec![42]);
     }
     #[test]
-    fn parse_prog_104() {
-        test_prog("test/aps1/prog104.aps".to_string());
-    }
-
-    #[test]
-    fn parse_prog_105() {
-        test_prog("test/aps1/prog105.aps".to_string());
+    fn prog_104() {
+        test_prog("test/aps1/prog104.aps".to_string(), &vec![42]);
     }
 
     #[test]
-    fn parse_prog_106() {
-        test_prog("test/aps1/prog106.aps".to_string());
+    #[should_panic(expected = "variable not initialised")]
+    fn prog_105() {
+        test_prog("test/aps1/prog105.aps".to_string(), &vec![42]);
     }
 
     #[test]
-    fn parse_prog_107() {
-        test_prog("test/aps1/prog107.aps".to_string());
+    #[should_panic(expected = "variable not initialised")]
+    fn prog_106() {
+        test_prog("test/aps1/prog106.aps".to_string(), &vec![42]);
     }
 
     #[test]
-    fn parse_prog_108() {
-        test_prog("test/aps1/prog108.aps".to_string());
+    fn prog_107() {
+        test_prog("test/aps1/prog107.aps".to_string(), &vec![0, 42]);
     }
 
     #[test]
-    fn parse_prog_109() {
-        test_prog("test/aps1/prog109.aps".to_string());
+    fn prog_108() {
+        test_prog("test/aps1/prog108.aps".to_string(), &vec![42, 42]);
     }
 
     #[test]
-    fn parse_prog_110() {
-        test_prog("test/aps1/prog110.aps".to_string());
+    fn prog_109() {
+        test_prog("test/aps1/prog109.aps".to_string(), &vec![42]);
     }
 
     #[test]
-    fn parse_prog_111() {
-        test_prog("test/aps1/prog111.aps".to_string());
+    fn prog_110() {
+        test_prog("test/aps1/prog110.aps".to_string(), &vec![42]);
     }
 
     #[test]
-    fn parse_prog_112() {
-        test_prog("test/aps1/prog112.aps".to_string());
+    fn prog_111() {
+        test_prog("test/aps1/prog111.aps".to_string(), &vec![42]);
     }
 
     #[test]
-    fn parse_prog_113() {
-        test_prog("test/aps1/prog113.aps".to_string());
+    fn prog_112() {
+        test_prog("test/aps1/prog112.aps".to_string(), &vec![1]);
     }
 
     #[test]
-    fn parse_prog_114() {
-        test_prog("test/aps1/prog114.aps".to_string());
+    fn prog_113() {
+        test_prog("test/aps1/prog113.aps".to_string(), &vec![0]);
     }
 
     #[test]
-    fn parse_prog_115() {
-        test_prog("test/aps1/prog115.aps".to_string());
+    fn prog_114() {
+        test_prog("test/aps1/prog114.aps".to_string(), &vec![1]);
     }
 
     #[test]
-    fn parse_prog_116() {
-        test_prog("test/aps1/prog116.aps".to_string());
+    fn prog_115() {
+        test_prog("test/aps1/prog115.aps".to_string(), &vec![41, 42]);
     }
 
     #[test]
-    fn parse_prog_117() {
-        test_prog("test/aps1/prog117.aps".to_string());
+    fn prog_116() {
+        test_prog("test/aps1/prog116.aps".to_string(), &vec![21, 42]);
     }
 
     #[test]
-    fn parse_prog_118() {
-        test_prog("test/aps1/prog118.aps".to_string());
+    fn prog_117() {
+        test_prog("test/aps1/prog117.aps".to_string(), &vec![42]);
     }
 
     #[test]
-    fn parse_prog_119() {
-        test_prog("test/aps1/prog119.aps".to_string());
+    fn prog_118() {
+        test_prog("test/aps1/prog118.aps".to_string(), &vec![42]);
     }
 
     #[test]
-    fn parse_prog_120() {
-        test_prog("test/aps1/prog120.aps".to_string());
+    fn prog_119() {
+        test_prog("test/aps1/prog119.aps".to_string(), &vec![0, 42]);
+    }
+
+    #[test]
+    fn prog_120() {
+        test_prog("test/aps1/prog120.aps".to_string(), &vec![0, 42]);
     }
 }

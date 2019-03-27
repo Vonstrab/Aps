@@ -52,16 +52,13 @@ typeExpr(CTX,app(X,Y),Type):-
     nth(0,T,Type),
     remove(T),
     lenght(T,LT),
-    lenght(Y,LT).    
-    typeExpr(CTX, Y ,Type),
-
-
+    lenght(Y,LT),
+    typeExpr(CTX, Y ,Type).
 
 typeExpr(CTX,app( abs(X,Z) , Y ),Type):-
     append(CTX,X ,CTX2),
     typeExpr(CTX2, Z ,Type),
     typeExpr(CTX2, Y ,Type).
-
 
 typeExpr(_,abs(_,_),_).
     
@@ -85,8 +82,17 @@ Declarations
 
 typeDec(CTX,const(X,T,E),[(X , T)| CTX]) :- typeExpr(CTX , E , T).
 
-typeDec(CTX,var(X,T),[(X , T)| CTX]) .
+typeDec(CTX,var(X,T),[(X , T)| CTX]).
 
+typeDec(CTX,proc(X,Args,T,E),[(X , Typef)| CTX]) :- 
+    append(CTX,Args ,CTXfunc),
+    typefunc(Typef, Args , void),
+    typeExpr(CTXfunc , E , T).
+    
+typeDec(CTX,procRec(X,Args,T,E),[(X , Typef)| CTX]  ) :- 
+    append(CTX,Args ,CTXfunc),
+    typefunc(Typef, Args,void),
+    typeExpr([typef|CTXfunc] , E,T).
 
 typeDec(CTX,fonction(X,Args,T,E),[(X , Typef)| CTX]) :- 
     append(CTX,Args ,CTXfunc),
@@ -104,6 +110,29 @@ Stat
 */
 
 typeStat(CTX, echo(S),void):- typeExpr(CTX,S,int).
+
+typeStat(CTX, statIf(Cond,Else,Then),void):- 
+    typeExpr(CTX,Cond,bool),
+    typeProg(Else,void),
+    typeProg(Then,void).
+
+
+typeStat(CTX, statWhile(Cond,Loop),void):- 
+    typeExpr(CTX,Cond,bool),
+    typeProg(Loop,void).
+
+typeStat(CTX, statCall(Proc,Args),void):- 
+    dansGram(CTX, Proc ,T),
+    nth(0,T,void),
+    remove(T),
+    lenght(T,LT),
+    lenght(Args,LT),
+    typeExpr(CTX, Y ,Type).
+
+typeStat(CTX, statSet(Var,Expr),void):-
+    dansGram(CTX,Var,Type),
+    typeExpr(CTX,Expr,Type).
+
 
 /*
 CDMS

@@ -50,7 +50,7 @@ pub enum AstExp {
     ASTAbs(Vec<Arg>, Box<AstExp>),
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub enum AstDec {
     ASTConst(String, Type, Box<AstExp>),
     ASTFunc(String, Type, Vec<Arg>, Box<AstExp>),
@@ -60,7 +60,7 @@ pub enum AstDec {
     ASTProcRec(String, Vec<Arg>, Box<AstCdms>),
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub enum AstStat {
     ASTEcho(Box<AstExp>),
     ASTSet(String, Box<AstExp>),
@@ -69,7 +69,7 @@ pub enum AstStat {
     ASTCall(String, Vec<Box<AstExp>>),
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub enum AstCdms {
     FStat(Box<AstStat>),
     Dec(Box<AstDec>, Box<AstCdms>),
@@ -133,7 +133,7 @@ impl std::fmt::Debug for AstCdms {
         match self {
             Stat(s, cs) => write!(fmt, "ASTCMDS {:?}, {:?}", s, cs),
             Dec(d, cs) => write!(fmt, "ASTCMDS {:?}, {:?}", d, cs),
-            FStat(s) => write!(fmt, "{:?}", s),
+            FStat(s) => write!(fmt, "FSTAT( {:?} )", s),
         }
     }
 }
