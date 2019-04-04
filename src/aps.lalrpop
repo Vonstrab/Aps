@@ -69,6 +69,7 @@ pub tprim : Type = {
     "int" => Type::Int,
     "bool" => Type::Bool,
     "void" => Type::Void,
+    "(" "vec" <t:tprim> ")" => Type::Vector(Box::new(t)),
 };
 
 Spaces<E>: Vec<E> =
@@ -82,7 +83,6 @@ v0.into_iter().chain(e1).collect();
 Asterisk<E>: Vec<E> =
     <v0:(<E> "*")*> <e1:E?> =>
 v0.into_iter().chain(e1).collect();
-
 
 Num: i64={ r"(-)?[0-9]+" => i64::from_str(<>).unwrap()};
 ident :String=  r"([a-zA-Z])([a-zA-Z0-9])*" => <>.to_string();

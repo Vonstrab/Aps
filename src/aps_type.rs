@@ -6,7 +6,7 @@ pub enum Type {
     Bool,
     Void,
     Func(Vec<Type>, Box<Type>),
-    Vector,
+    Vector(Box<Type>),
 }
 
 impl std::fmt::Debug for Type {
@@ -26,7 +26,7 @@ impl std::fmt::Debug for Type {
                 }
                 write!(fmt, " -> {:?}", retour)
             }
-            Vector => write!(fmt, "vec"),
+            Vector(t) => write!(fmt, "vec {:?}", t),
         }
     }
 }
@@ -48,7 +48,7 @@ impl std::fmt::Display for Type {
                 }
                 write!(fmt, " -> {}", retour)
             }
-            Vector => write!(fmt, "vec"),
+            Vector(t) => write!(fmt, "vec {:?}", t),
         }
     }
 }
