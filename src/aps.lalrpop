@@ -19,16 +19,6 @@ pub CDMS : Box<AstCdms> = {
     <st:statement> ";" <cdms:CDMS>=> Box::new( AstCdms::Stat(st,cdms) ),
 };
 
-pub TYPE : Type ={
-    <tprim>,
-    "(" <args:Asterisk<TYPE>> "->" <ret:TYPE> ")" => Type::Func(args,Box::new(ret)),
-};
-
-pub ARG: Arg = { 
-    <id:ident> ":" <t:TYPE> => Arg::new(&id,&t)  ,
-};
-
-
 pub declaration : Box<AstDec> = {
     "CONST" <id:ident> <t:TYPE> <e:expr> => Box::new(AstDec::ASTConst(id,t,e)),
     "FUN" <id:ident> <t:TYPE> "[" <a:Comma<ARG>> "]" <e:expr> =>Box::new(AstDec::ASTFunc(id,t,a,e)),
@@ -40,7 +30,7 @@ pub declaration : Box<AstDec> = {
 
 pub statement : Box<AstStat> = {
     "ECHO" <expr> => Box::new(AstStat::ASTEcho(<>)),
-    "SET" <id:ident> <e:expr> => Box::new(AstStat::ASTSet(id,e)),
+    "SET" <l:Lval> <e:expr> => Box::new(AstStat::ASTSet(l,e)),
     "IF" <e:expr> <then:Block> <els:Block> => Box::new(AstStat::ASTIf(e,then,els)),
     "WHILE" <e:expr> <body:Block> => Box::new(AstStat::ASTWhile(e,body)),
     "CALL" <id:ident> <es:Spaces<expr>> => Box::new(AstStat::ASTCall(id,es))
@@ -63,6 +53,24 @@ pub expr : Box<AstExp> = {
     "(" "div" <e1:expr> <e2:expr> ")" =>Box::new(AstExp::ASTBinPrim(Oprim::Div,e1,e2)),
     "[" <a:Comma<ARG>>  "]" <expr:expr> =>Box::new(AstExp::ASTAbs(a,expr)),
     "(" <id:ident> <es:Spaces<expr>> ")" =>Box::new(AstExp::ASTApp(id,es)),
+    "(" "len" <e:expr> ")" =>Box::new(AstExp::ASTLen(e)),
+    "(" "alloc" <e:expr> ")" =>Box::new(AstExp::ASTAlloc(e)),
+    "(" "nth" <e1:expr> <e2:expr> ")" =>Box::new(AstExp::ASTNth(e1,e2)),
+};
+
+pub Lval : Lval ={
+    <ident> => Lval::Ident(<>),
+    "(" "nth" <l:Lval> <e:expr> ")" => Lval::Nth(Box::new(l),e),
+}
+
+pub TYPE : Type ={
+    <tprim>,
+    "(" <args:Asterisk<TYPE>> "->" <ret:TYPE> ")" => Type::Func(args,Box::new(ret)),
+    "vec" <t:TYPE>  => Type::Vector(Box::new(t)),
+};
+
+pub ARG: Arg = { 
+    <id:ident> ":" <t:TYPE> => Arg::new(&id,&t)  ,
 };
 
 pub tprim : Type = {

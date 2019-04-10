@@ -1,13 +1,14 @@
 use std::fmt::{Error, Formatter};
+// use std::hash::Hash;
 
 use super::aps_type::Type;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq,Eq,Hash)]
 pub enum UnOprim {
     Not,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq,Eq,Hash)]
 pub enum Oprim {
     Eq,
     Lt,
@@ -19,10 +20,28 @@ pub enum Oprim {
     Or,
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone,Eq,Hash)]
 pub struct Arg {
     pub ident: String,
     pub id_type: Type,
+}
+
+#[derive(Debug, PartialEq, Clone,Eq,Hash)]
+pub enum Lval {
+    Ident(String),
+    Nth(Box<Lval>, Box<AstExp>),
+}
+
+impl Lval {
+    pub fn to_prolog(&self)->String{
+        use self::Lval::*;
+
+
+        match self {
+            Ident(s) => format!("id({})",s),
+            Nth(l,e1) => format!("nth( {}, {})",l.to_prolog(),e1.to_prolog()),
+        }
+    }
 }
 
 impl Arg {
@@ -38,7 +57,7 @@ impl Arg {
     }
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq,Eq,Hash)]
 pub enum AstExp {
     ASTIdent(String),
     ASTInt(i64),
@@ -48,9 +67,12 @@ pub enum AstExp {
     ASTBinPrim(Oprim, Box<AstExp>, Box<AstExp>),
     ASTApp(String, Vec<Box<AstExp>>),
     ASTAbs(Vec<Arg>, Box<AstExp>),
+    ASTLen(Box<AstExp>),
+    ASTAlloc(Box<AstExp>),
+    ASTNth(Box<AstExp>, Box<AstExp>),
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq,Eq,Hash)]
 pub enum AstDec {
     ASTConst(String, Type, Box<AstExp>),
     ASTFunc(String, Type, Vec<Arg>, Box<AstExp>),
@@ -60,16 +82,16 @@ pub enum AstDec {
     ASTProcRec(String, Vec<Arg>, Box<AstCdms>),
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq,Eq,Hash)]
 pub enum AstStat {
     ASTEcho(Box<AstExp>),
-    ASTSet(String, Box<AstExp>),
+    ASTSet(Lval, Box<AstExp>),
     ASTIf(Box<AstExp>, Box<AstCdms>, Box<AstCdms>),
     ASTWhile(Box<AstExp>, Box<AstCdms>),
     ASTCall(String, Vec<Box<AstExp>>),
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq,Eq,Hash)]
 pub enum AstCdms {
     FStat(Box<AstStat>),
     Dec(Box<AstDec>, Box<AstCdms>),
@@ -88,6 +110,9 @@ impl std::fmt::Debug for AstExp {
             ASTApp(x, e1) => write!(fmt, "ASTApp( {:?} ,{:?})", x, e1),
             ASTIf(e1, e2, e3) => write!(fmt, "ASTif( {:?} ,{:?}, {:?})", e1, e2, e3),
             ASTIdent(id) => write!(fmt, "ASTIdent( {:?} )", id),
+            ASTLen(exp) => write!(fmt, "ASTLen( {:?} )", exp),
+            ASTAlloc(exp) => write!(fmt, "ASTAlloc( {:?} )", exp),
+            ASTNth(exp1, exp2) => write!(fmt, "ASTNth( {:?} ,{:?} )", exp1, exp2),
         }
     }
 }
@@ -97,7 +122,7 @@ impl std::fmt::Debug for AstStat {
         use self::AstStat::*;
         match self {
             ASTEcho(e1) => write!(fmt, "ASTEcho ( {:?} )", e1),
-            ASTSet(x, e1) => write!(fmt, "ASTSet( {:?} , {:?} )", x, e1),
+            ASTSet(l, e1) => write!(fmt, "ASTSet( {:?} , {:?} )", l, e1),
             ASTIf(e1, bl1, bl2) => write!(fmt, "ASTIF( {:?} , {:?} , {:?} )", e1, bl1, bl2),
             ASTWhile(e1, bl) => write!(fmt, "ASTWHILE( {:?} , {:?} )", e1, bl),
             ASTCall(x, exps) => write!(fmt, "ASTCall( {:?} , {:?} )", x, exps),
@@ -144,7 +169,7 @@ impl AstExp {
         let mut out: String = String::new();
         match self {
             ASTInt(n) => {
-                let s = format!("integer({})", n);
+                let s = format!("integer( {} )", n);
                 out.push_str(s.as_str());
             }
             ASTBool(b) => {
@@ -152,7 +177,7 @@ impl AstExp {
                 out.push_str(s.as_str());
             }
             ASTUnPrim(_op, e1) => {
-                let s = format!("unOp( {} ))", e1.to_prolog());
+                let s = format!("unOp( {} )", e1.to_prolog());
                 out.push_str(s.as_str());
             }
             ASTBinPrim(op, e1, e2) => match op {
@@ -191,7 +216,7 @@ impl AstExp {
             },
             ASTIf(e1, e2, e3) => {
                 let s = format!(
-                    "exprIf({},{},{})",
+                    "exprIf( {} , {} , {} )",
                     e1.to_prolog(),
                     e2.to_prolog(),
                     e3.to_prolog()
@@ -199,7 +224,7 @@ impl AstExp {
                 out.push_str(s.as_str());
             }
             ASTIdent(s1) => {
-                let s = format!("id({})", s1);
+                let s = format!("id( {} )", s1);
                 out.push_str(s.as_str());
             }
             ASTAbs(a, e1) => {
@@ -212,7 +237,7 @@ impl AstExp {
                     }
                 }
                 args.push(']');
-                let s = format!("abs({},{})", args, e1.to_prolog());
+                let s = format!("abs( {} , {} )", args, e1.to_prolog());
                 out.push_str(s.as_str());
             }
             ASTApp(e1, e) => {
@@ -225,9 +250,19 @@ impl AstExp {
                     }
                 }
                 exprs.push(']');
-                let s = format!("app({},{})", e1, exprs);
+                let s = format!("app( {} , {} )", e1, exprs);
                 out.push_str(s.as_str());
             }
+            ASTLen(exp) => {
+                let s = format!("len( {} )",exp.to_prolog());
+                out.push_str(s.as_str());},
+            ASTAlloc(exp) => {
+                let s = format!("alloc( {} )",exp.to_prolog());
+                out.push_str(s.as_str());
+                },
+            ASTNth(l, e1) => {
+                let s = format!("expnth( {} , {} )",l.to_prolog(),e1.to_prolog());
+                out.push_str(s.as_str());},
         }
         out
     }
@@ -250,7 +285,7 @@ impl AstDec {
                 }
                 args.push(']');
 
-                let s = format!("dec(proc({},{},{}))", x, args, e.to_prolog());
+                let s = format!("dec( proc( {} , {} , {} ))", x, args, e.to_prolog());
                 out.push_str(s.as_str());
             }
             ASTProcRec(x, a, e) => {
@@ -264,7 +299,7 @@ impl AstDec {
                 }
                 args.push(']');
 
-                let s = format!("dec(procRec({},{},{}))", x, args, e.to_prolog());
+                let s = format!("dec( procRec( {} , {} , {} ) )", x, args, e.to_prolog());
                 out.push_str(s.as_str());
             }
             ASTFunc(x, t, a, e) => {
@@ -278,7 +313,7 @@ impl AstDec {
                 }
                 args.push(']');
 
-                let s = format!("dec(fonction({},{:?},{},{}))", x, t, args, e.to_prolog());
+                let s = format!("dec( fonction( {} , {:?} , {} , {} ) )", x, t, args, e.to_prolog());
                 out.push_str(s.as_str());
             }
             ASTFuncRec(x, t, a, e) => {
@@ -292,17 +327,17 @@ impl AstDec {
                 }
                 args.push(']');
 
-                let s = format!("dec(fonctionRec({},{:?},{},{}))", x, t, args, e.to_prolog());
+                let s = format!("dec( fonctionRec( {} , {:?} , {} , {} ) )", x, t, args, e.to_prolog());
                 out.push_str(s.as_str());
             }
 
             ASTVar(var, t) => {
-                let s = format!("dec(var({}, {}))", var, t);
+                let s = format!("dec( var( {} , {} ) )", var, t);
                 out.push_str(s.as_str());
             }
 
             ASTConst(var, t, exp) => {
-                let s = format!("dec(const({}, {:?}, {}))", var, t, exp.to_prolog());
+                let s = format!("dec( const( {} , {:?} , {} ) )", var, t, exp.to_prolog());
                 out.push_str(s.as_str());
             }
         }
@@ -316,12 +351,12 @@ impl AstStat {
         let mut out: String = String::new();
         match self {
             ASTEcho(e1) => {
-                let s = format!("stat(echo({}))", e1.to_prolog());
+                let s = format!("stat( echo( {} ) ) ", e1.to_prolog());
                 out.push_str(s.as_str());
             }
             ASTIf(e1, bl1, bl2) => {
                 let s = format!(
-                    "stat(statIf({},{},{}))",
+                    "stat( statIf( {} , {} , {} ) )",
                     e1.to_prolog(),
                     bl1.to_prolog(),
                     bl2.to_prolog()
@@ -329,7 +364,7 @@ impl AstStat {
                 out.push_str(s.as_str());
             }
             ASTWhile(e1, bl) => {
-                let s = format!("stat(while({},{}))", e1.to_prolog(), bl.to_prolog(),);
+                let s = format!("stat( swhile( {} , {} ) )", e1.to_prolog(), bl.to_prolog(),);
                 out.push_str(s.as_str());
             }
             ASTCall(s, e) => {
@@ -342,11 +377,11 @@ impl AstStat {
                     }
                 }
                 exprs.push(']');
-                let s = format!("stat(call({},{}))", s, exprs);
+                let s = format!("stat( call( {} , {} ) )", s, exprs);
                 out.push_str(s.as_str());
             }
             ASTSet(s, e) => {
-                let s = format!("stat(set({},{}))", s, e.to_prolog());
+                let s = format!("stat( set( {} , {} ) )", s.to_prolog(), e.to_prolog());
                 out.push_str(s.as_str());
             }
         }
@@ -364,11 +399,11 @@ impl AstCdms {
                 out.push_str(s.as_str());
             }
             Stat(s, cs) => {
-                let s = format!("cdms({},{})", s.to_prolog(), cs.to_prolog());
+                let s = format!("cdms( {} , {} )", s.to_prolog(), cs.to_prolog());
                 out.push_str(s.as_str());
             }
             Dec(d, cs) => {
-                let s = format!("cdms({},{})", d.to_prolog(), cs.to_prolog());
+                let s = format!("cdms( {} , {} )", d.to_prolog(), cs.to_prolog());
                 out.push_str(s.as_str());
             }
         }

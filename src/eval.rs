@@ -151,15 +151,15 @@ impl ast::AstStat {
                 let value = expr.eval(env, mem);
                 flux_sortie.push(value.as_int(mem))
             }
-            ASTSet(s, exp) => match &env[s] {
-                Value::Adress(a) => {
-                    let adr = *a;
-                    mem[adr] = exp.eval(env, mem);
-                }
-                _ => {
-                    panic!("NOT An Adress");
-                }
-            },
+            ASTSet(s, exp) => {}//match &env[s] {
+            //     Value::Adress(a) => {
+            //         let adr = *a;
+            //         mem[adr] = exp.eval(env, mem);
+            //     }
+            //     _ => {
+            //         panic!("NOT An Adress");
+            //     }
+            // },
             ASTIf(e, el, th) => {
                 if e.eval(env, mem).as_int(mem) == 1 {
                     flux_sortie.append(&mut el.eval(env, mem));
@@ -202,6 +202,7 @@ impl ast::AstStat {
                 }
                 _ => panic!("not a proc"),
             },
+            
         }
 
         println!("FLUX SORTIE : {:?} ", flux_sortie);
@@ -296,6 +297,9 @@ impl ast::AstExp {
                 }
                 Value::Fermeture(e.clone(), abs_args, env.clone())
             }
+            ASTLen(e) =>{Value::Any},
+            ASTAlloc(e) => {Value::Any},
+            ASTNth(e1,e2) => {Value::Any}
         }
     }
 }

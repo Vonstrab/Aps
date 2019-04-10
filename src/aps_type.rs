@@ -1,6 +1,6 @@
 use std::fmt::{Error, Formatter};
 
-#[derive(PartialEq, Clone)]
+#[derive(PartialEq, Clone,Eq,Hash)]
 pub enum Type {
     Int,
     Bool,
@@ -26,7 +26,7 @@ impl std::fmt::Debug for Type {
                 }
                 write!(fmt, " -> {:?}", retour)
             }
-            Vector(t) => write!(fmt, "vec {:?}", t),
+            Vector(t) => write!(fmt, "vec( {:?} )", t),
         }
     }
 }
@@ -48,7 +48,7 @@ impl std::fmt::Display for Type {
                 }
                 write!(fmt, " -> {}", retour)
             }
-            Vector(t) => write!(fmt, "vec {:?}", t),
+            Vector(t) => write!(fmt, "vec( {} )", t),
         }
     }
 }

@@ -23,7 +23,7 @@ fn test_type(ast: &Box<ast::AstCdms>) -> bool {
     let mut prolog = ast.to_prolog();
     prolog.push('.');
 
-    println!("\nOutProlog : {}", prolog);
+    println!("\nOutProlog : typeProg( {} , void )", prolog);
 
     let script_prolog = Command::new("./typage.sh")
         .arg(prolog)
@@ -308,5 +308,50 @@ mod aps1 {
     #[test]
     fn prog_120() {
         test_prog("test/aps1/prog120.aps".to_string(), &vec![0, 42]);
+    }
+}
+#[cfg(test)]
+mod aps2 {
+
+    use super::*;
+    extern crate aps_lib;
+
+    #[test]
+    fn prog_200() {
+        test_prog("test/aps2/prog200.aps".to_string(), &vec![42]);
+    }
+
+    #[test]
+    fn prog_201() {
+        test_prog("test/aps2/prog201.aps".to_string(), &vec![42]);
+    }
+
+    #[test]
+    fn prog_202() {
+        test_prog("test/aps2/prog202.aps".to_string(), &vec![42]);
+    }
+
+    #[test]
+    fn prog_203() {
+        test_prog("test/aps2/prog203.aps".to_string(), &vec![42]);
+    }
+    #[test]
+    fn prog_204() {
+        test_prog("test/aps2/prog204.aps".to_string(), &vec![42]);
+    }
+
+    #[test]
+    fn prog_205() {
+        test_prog("test/aps2/prog205.aps".to_string(), &vec![42]);
+    }
+
+    #[test]
+    fn prog_206() {
+        test_prog("test/aps2/prog206.aps".to_string(), &vec![42]);
+    }
+
+    #[test]
+    fn prog_207() {
+        test_prog("test/aps2/prog207.aps".to_string(), &vec![42]);
     }
 }
