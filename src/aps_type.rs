@@ -1,6 +1,6 @@
 use std::fmt::{Error, Formatter};
 
-#[derive(PartialEq, Clone,Eq,Hash)]
+#[derive(PartialEq, Clone, Eq, Hash)]
 pub enum Type {
     Int,
     Bool,

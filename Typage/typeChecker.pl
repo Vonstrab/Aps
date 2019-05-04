@@ -30,7 +30,8 @@ typeCMDS(CTX , dec(D) , stat(S2) , void ) :-
 typeExpr
 */
 
-typeExpr(_,integer(X),int):-typeExpr(_,X,int).
+typeExpr(CTX,integer(id(X)),int):-typeExpr(CTX,id(X),int).
+typeExpr(_,integer(_),int).
 typeExpr(_,false,bool). 
 typeExpr(_,true,bool).
 
@@ -68,7 +69,7 @@ typeExpr(CTX,expnth(L,E),T):-
 
 typeExpr(CTX,abs(Args,E),T):-
     append(CTX,Args ,CTXfunc),
-    typefunc(Typef, Args , T),
+    # typefunc(Typef, Args , T),
     typeExpr(CTXfunc , E , T).
     
 

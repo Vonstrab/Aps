@@ -3,12 +3,12 @@ use std::fmt::{Error, Formatter};
 
 use super::aps_type::Type;
 
-#[derive(Debug, Clone, PartialEq,Eq,Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum UnOprim {
     Not,
 }
 
-#[derive(Debug, Clone, PartialEq,Eq,Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Oprim {
     Eq,
     Lt,
@@ -20,26 +20,25 @@ pub enum Oprim {
     Or,
 }
 
-#[derive(Debug, PartialEq, Clone,Eq,Hash)]
+#[derive(Debug, PartialEq, Clone, Eq, Hash)]
 pub struct Arg {
     pub ident: String,
     pub id_type: Type,
 }
 
-#[derive(Debug, PartialEq, Clone,Eq,Hash)]
+#[derive(Debug, PartialEq, Clone, Eq, Hash)]
 pub enum Lval {
     Ident(String),
     Nth(Box<Lval>, Box<AstExp>),
 }
 
 impl Lval {
-    pub fn to_prolog(&self)->String{
+    pub fn to_prolog(&self) -> String {
         use self::Lval::*;
 
-
         match self {
-            Ident(s) => format!("id({})",s),
-            Nth(l,e1) => format!("nth( {}, {})",l.to_prolog(),e1.to_prolog()),
+            Ident(s) => format!("id({})", s),
+            Nth(l, e1) => format!("nth( {}, {})", l.to_prolog(), e1.to_prolog()),
         }
     }
 }
@@ -57,7 +56,7 @@ impl Arg {
     }
 }
 
-#[derive(Clone, PartialEq,Eq,Hash)]
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub enum AstExp {
     ASTIdent(String),
     ASTInt(i64),
@@ -72,7 +71,7 @@ pub enum AstExp {
     ASTNth(Box<AstExp>, Box<AstExp>),
 }
 
-#[derive(Clone, PartialEq,Eq,Hash)]
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub enum AstDec {
     ASTConst(String, Type, Box<AstExp>),
     ASTFunc(String, Type, Vec<Arg>, Box<AstExp>),
@@ -82,7 +81,7 @@ pub enum AstDec {
     ASTProcRec(String, Vec<Arg>, Box<AstCdms>),
 }
 
-#[derive(Clone, PartialEq,Eq,Hash)]
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub enum AstStat {
     ASTEcho(Box<AstExp>),
     ASTSet(Lval, Box<AstExp>),
@@ -91,7 +90,7 @@ pub enum AstStat {
     ASTCall(String, Vec<Box<AstExp>>),
 }
 
-#[derive(Clone, PartialEq,Eq,Hash)]
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub enum AstCdms {
     FStat(Box<AstStat>),
     Dec(Box<AstDec>, Box<AstCdms>),
@@ -254,15 +253,17 @@ impl AstExp {
                 out.push_str(s.as_str());
             }
             ASTLen(exp) => {
-                let s = format!("len( {} )",exp.to_prolog());
-                out.push_str(s.as_str());},
-            ASTAlloc(exp) => {
-                let s = format!("alloc( {} )",exp.to_prolog());
+                let s = format!("len( {} )", exp.to_prolog());
                 out.push_str(s.as_str());
-                },
+            }
+            ASTAlloc(exp) => {
+                let s = format!("alloc( {} )", exp.to_prolog());
+                out.push_str(s.as_str());
+            }
             ASTNth(l, e1) => {
-                let s = format!("expnth( {} , {} )",l.to_prolog(),e1.to_prolog());
-                out.push_str(s.as_str());},
+                let s = format!("expnth( {} , {} )", l.to_prolog(), e1.to_prolog());
+                out.push_str(s.as_str());
+            }
         }
         out
     }
@@ -313,7 +314,13 @@ impl AstDec {
                 }
                 args.push(']');
 
-                let s = format!("dec( fonction( {} , {:?} , {} , {} ) )", x, t, args, e.to_prolog());
+                let s = format!(
+                    "dec( fonction( {} , {:?} , {} , {} ) )",
+                    x,
+                    t,
+                    args,
+                    e.to_prolog()
+                );
                 out.push_str(s.as_str());
             }
             ASTFuncRec(x, t, a, e) => {
@@ -327,7 +334,13 @@ impl AstDec {
                 }
                 args.push(']');
 
-                let s = format!("dec( fonctionRec( {} , {:?} , {} , {} ) )", x, t, args, e.to_prolog());
+                let s = format!(
+                    "dec( fonctionRec( {} , {:?} , {} , {} ) )",
+                    x,
+                    t,
+                    args,
+                    e.to_prolog()
+                );
                 out.push_str(s.as_str());
             }
 
