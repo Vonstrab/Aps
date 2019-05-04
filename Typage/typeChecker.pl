@@ -66,7 +66,10 @@ typeExpr(CTX,expnth(L,E),T):-
     typeExpr(CTX,L,vec(T)),
     typeExpr(CTX,E,int).
 
-typeExpr(_,abs(_,_),_).
+typeExpr(CTX,abs(Args,E),T):-
+    append(CTX,Args ,CTXfunc),
+    typefunc(Typef, Args , T),
+    typeExpr(CTXfunc , E , T).
     
 
 /*

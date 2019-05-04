@@ -10,6 +10,7 @@ pub enum Value {
     Fermeture(Box<ast::AstExp>, Vec<String>, HashMap<String, Value>),
     FermetureRec(Box<ast::AstExp>, Vec<String>, HashMap<String, Value>),
     Adress(usize),
+    Vector(Vec<Value>),
     Any,
 }
 
@@ -151,15 +152,18 @@ impl ast::AstStat {
                 let value = expr.eval(env, mem);
                 flux_sortie.push(value.as_int(mem))
             }
-            ASTSet(s, exp) => {}//match &env[s] {
-            //     Value::Adress(a) => {
-            //         let adr = *a;
-            //         mem[adr] = exp.eval(env, mem);
-            //     }
-            //     _ => {
-            //         panic!("NOT An Adress");
-            //     }
-            // },
+            ASTSet(lv, exp) => match lv {
+                ast::Lval::Ident(s) => match &env[s] {
+                    Value::Adress(a) => {
+                        let adr = *a;
+                        mem[adr] = exp.eval(env, mem);
+                    }
+                    _ => {
+                        panic!("NOT An Adress");
+                    }
+                },
+                _ => panic!("418 i'm a teapot"),
+            },
             ASTIf(e, el, th) => {
                 if e.eval(env, mem).as_int(mem) == 1 {
                     flux_sortie.append(&mut el.eval(env, mem));
@@ -202,7 +206,6 @@ impl ast::AstStat {
                 }
                 _ => panic!("not a proc"),
             },
-            
         }
 
         println!("FLUX SORTIE : {:?} ", flux_sortie);
@@ -213,7 +216,7 @@ impl ast::AstStat {
 impl ast::AstExp {
     pub fn eval(&self, env: &HashMap<String, Value>, mem: &Vec<Value>) -> Value {
         println!("\nInto Expr eval");
-        println!("self {:?}", self);
+        println!("expr : {:?}", self);
         println!("env {:?}", env);
         println!("mem {:?}", mem);
 
@@ -297,9 +300,27 @@ impl ast::AstExp {
                 }
                 Value::Fermeture(e.clone(), abs_args, env.clone())
             }
-            ASTLen(e) =>{Value::Any},
-            ASTAlloc(e) => {Value::Any},
-            ASTNth(e1,e2) => {Value::Any}
+            ASTLen(e) => match e.eval(&env, mem) {
+                Value::Vector(v) => Value::Int(v.len() as i64),
+                _ => panic!(format!(" {:?} is not a vector", e)),
+            },
+            ASTAlloc(e) => match e.eval(&env, mem) {
+                Value::Int(n) => {
+                    let mut v = Vec::new();
+                    for _ in 0..n {
+                        v.push(Value::Any);
+                    }
+                    Value::Vector(v)
+                }
+                _ => panic!(format!(" {:?} is not a number", e)),
+            },
+            ASTNth(e1, e2) => match e1.eval(&env, mem) {
+                Value::Vector(v) => match e2.eval(&env, mem) {
+                    Value::Int(n) => v[n as usize].clone(),
+                    _ => panic!(format!(" {:?} is not a number", e2)),
+                },
+                _ => panic!(format!(" {:?} is not a vector", e1)),
+            },
         }
     }
 }

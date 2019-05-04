@@ -250,7 +250,7 @@ mod aps1 {
         test_prog("test/aps1/prog108.aps".to_string(), &vec![42, 42]);
     }
 
-    #[test]
+    // #[test]
     fn prog_109() {
         test_prog("test/aps1/prog109.aps".to_string(), &vec![42]);
     }
