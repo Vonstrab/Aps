@@ -73,8 +73,11 @@ fn main() {
                 println!("Erreur de typage!");
             } else {
                 println!("Typage Correct!");
-                // println!("Evaluation :");
-                //    let eval = ast.eval(&mut HashMap::new(),&mut Vec::new());
+                ast.eval(
+                    &mut HashMap::new(),
+                    &mut aps_lib::eval::Memoire { mem: Vec::new() },
+                );
+                println!("Fin Du prgramme");
             }
         }
     }
@@ -98,7 +101,9 @@ fn test_prog(filename: String, expected: &Vec<i64>) {
     if !type_res {
         panic!("Erreur de type");
     }
-    assert_eq!(*expected, past.eval(&mut HashMap::new(), &mut Vec::new()));
+    let mut mem = aps_lib::eval::Memoire { mem: Vec::new() };
+    assert_eq!(*expected, past.eval(&mut HashMap::new(), &mut mem));
+    println!("memoire : {:?}", mem);
 }
 
 #[cfg(test)]
@@ -255,12 +260,12 @@ mod aps1 {
         test_prog("test/aps1/prog109.aps".to_string(), &vec![42]);
     }
 
-    // #[test]
+    #[test]
     fn prog_110() {
         test_prog("test/aps1/prog110.aps".to_string(), &vec![42]);
     }
 
-    // #[test]
+    #[test]
     fn prog_111() {
         test_prog("test/aps1/prog111.aps".to_string(), &vec![42]);
     }
@@ -318,26 +323,26 @@ mod aps2 {
 
     #[test]
     fn prog_200() {
-        test_prog("test/aps2/prog200.aps".to_string(), &vec![42]);
+        test_prog("test/aps2/prog200.aps".to_string(), &vec![1, 2, 3, 4, 5]);
     }
 
     #[test]
     fn prog_201() {
-        test_prog("test/aps2/prog201.aps".to_string(), &vec![42]);
+        test_prog("test/aps2/prog201.aps".to_string(), &vec![]);
     }
 
     #[test]
     fn prog_202() {
-        test_prog("test/aps2/prog202.aps".to_string(), &vec![42]);
+        test_prog("test/aps2/prog202.aps".to_string(), &vec![]);
     }
 
     #[test]
     fn prog_203() {
-        test_prog("test/aps2/prog203.aps".to_string(), &vec![42]);
+        test_prog("test/aps2/prog203.aps".to_string(), &vec![]);
     }
     #[test]
     fn prog_204() {
-        test_prog("test/aps2/prog204.aps".to_string(), &vec![42]);
+        test_prog("test/aps2/prog204.aps".to_string(), &vec![]);
     }
 
     #[test]
@@ -352,6 +357,6 @@ mod aps2 {
 
     #[test]
     fn prog_207() {
-        test_prog("test/aps2/prog207.aps".to_string(), &vec![42]);
+        test_prog("test/aps2/prog207.aps".to_string(), &vec![]);
     }
 }
