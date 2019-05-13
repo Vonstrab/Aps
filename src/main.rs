@@ -83,6 +83,7 @@ fn main() {
     }
 }
 
+#[allow(dead_code)]
 fn test_prog(filename: String, expected: &Vec<i64>) {
     let parser_ast = aps::ProgParser::new();
 
