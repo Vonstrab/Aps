@@ -1,7 +1,7 @@
 use std::fmt::{Error, Formatter};
 // use std::hash::Hash;
 
-use super::aps_type::Type;
+use super::rum_type::Type;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum UnOprim {

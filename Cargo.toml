@@ -1,19 +1,19 @@
 [package]
-name = "aps"
-version = "1.0.0"
+name = "rum"
+version = "3.1.2"
 authors = ["Ivan <delgado.ivan@protonmail.com>"]
 edition = "2018"
 
 [[bin]]
-name = "aps_bin"
+name = "rum_bin"
 path = "src/main.rs"
 
 [lib]
-name = "aps_lib"
+name = "rum_lib"
 
 [build-dependencies] # <-- We added this and everything after!
-lalrpop = "0.16.3"
+lalrpop = "0.18.1"
 
 [dependencies]
-lalrpop-util = "0.16.3"
-regex = "0.2.1"
+lalrpop-util = "0.18.1"
+regex = "1.3.4"

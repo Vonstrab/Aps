@@ -337,7 +337,7 @@ impl ast::AstExp {
                 Value::Fermeture(e.clone(), abs_args, env.clone())
             }
 
-            // APS2
+            // rum2
             ASTAlloc(e) => match e.eval(&env, mem) {
                 Value::Int(n) => mem.allocn(n as usize),
                 _ => panic!(format!(" {:?} is not a Number", e)),

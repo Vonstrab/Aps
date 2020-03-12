@@ -1,6 +1,7 @@
 use std::str::FromStr;
-use aps_lib::ast::*;
-use aps_lib::aps_type::Type;
+
+use rum_lib::ast::*;
+use rum_lib::rum_type::Type;
 
 
 grammar;
