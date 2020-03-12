@@ -1,5 +1,4 @@
 #[macro_use]
-extern crate lalrpop;
 extern crate lalrpop_util;
 extern crate rum_lib;
 
@@ -47,7 +46,7 @@ fn test_type(ast: &Box<ast::AstCdms>) -> bool {
 }
 
 fn main() {
-    println!("Version AST2");
+    println!("RUM Version 3");
 
     let parser_ast = rum::ProgParser::new();
 
