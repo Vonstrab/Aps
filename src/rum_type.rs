@@ -7,6 +7,7 @@ pub enum Type {
     Void,
     Func(Vec<Type>, Box<Type>),
     Vector(Box<Type>),
+    TypeError(String)
 }
 
 impl std::fmt::Debug for Type {
@@ -14,7 +15,7 @@ impl std::fmt::Debug for Type {
         use self::Type::*;
         match self {
             Int => write!(fmt, "int"),
-            Void => write!(fmt, "int"),
+            Void => write!(fmt, "int"),//TODO Check if its right
             Bool => write!(fmt, "bool"),
 
             Func(args, retour) => {
@@ -25,8 +26,9 @@ impl std::fmt::Debug for Type {
                     }
                 }
                 write!(fmt, " -> {:?}", retour)
-            }
+            },
             Vector(t) => write!(fmt, "vec( {:?} )", t),
+            TypeError (error_text) => write!(fmt, "Type Error( {:?} )", error_text)
         }
     }
 }
@@ -36,7 +38,7 @@ impl std::fmt::Display for Type {
         use self::Type::*;
         match self {
             Int => write!(fmt, "int"),
-            Void => write!(fmt, "int"),
+            Void => write!(fmt, "int"),//TODO Check if its right
             Bool => write!(fmt, "bool"),
 
             Func(args, retour) => {
@@ -47,8 +49,10 @@ impl std::fmt::Display for Type {
                     }
                 }
                 write!(fmt, " -> {}", retour)
-            }
+            },
             Vector(t) => write!(fmt, "vec( {} )", t),
+            TypeError (error_text) => write!(fmt, "Type Error( {} )", error_text)
+
         }
     }
 }
