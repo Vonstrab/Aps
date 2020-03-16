@@ -19,7 +19,7 @@ fn reader_from_file(filename: &PathBuf) -> BufReader<File> {
     BufReader::new(file)
 }
 
-fn test_type(ast: &Box<ast::AstCdms>) -> bool {
+fn test_type(ast: &ast::AstCdms) -> bool {
     let mut prolog = ast.to_prolog();
     prolog.push('.');
 
@@ -36,13 +36,10 @@ fn test_type(ast: &Box<ast::AstCdms>) -> bool {
     for c in result {
         result_str.push(c as char);
     }
+
     result_str.pop();
 
-    if result_str.eq("void") {
-        true
-    } else {
-        false
-    }
+    result_str.eq("void")
 }
 
 fn main() {
@@ -64,7 +61,7 @@ fn main() {
             println!("Code :\n{}", code);
 
             let ast = parser_ast.parse(&code).unwrap();
-            println!("AST : {:?}", ast);
+            println!("AST : {:#?}", ast);
 
             let type_res = test_type(&ast);
 
@@ -88,7 +85,7 @@ fn test_prog(filename: String, expected: &Vec<i64>) {
     let parser_ast = rum::ProgParser::new();
 
     let d = PathBuf::from(filename);
-    println!("Parse file : {:?}", d);
+    dbg!("Parse file : {:?}", &d);
 
     let mut code_reader = reader_from_file(&d);
     let mut code: String = String::new();
@@ -97,8 +94,8 @@ fn test_prog(filename: String, expected: &Vec<i64>) {
 
     let ast = parser_ast.parse(&code);
     let past = ast.expect("Parser failure");
-    println!("AST : {:?}", past);
-    let type_res = test_type(&past);
+    println!("AST : {:#?}", past);
+    let type_res = test_type(&past );
     if !type_res {
         panic!("Erreur de type");
     }
