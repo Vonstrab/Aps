@@ -11,7 +11,7 @@ pub Prog: Box<AstCdms> = {
 };
 
 pub Block: Box<AstCdms> = {
-    "[" <CDMS> "]" => <>,
+    "(" <CDMS> ")" => <>,
 };
 
 pub CDMS : Box<AstCdms> = {
@@ -22,15 +22,15 @@ pub CDMS : Box<AstCdms> = {
 
 pub declaration : Box<AstDec> = {
     "CONST" <id:ident> <t:TYPE> <e:expr> => Box::new(AstDec::ASTConst(id,t,e)),
-    "FUN" <id:ident> <t:TYPE> "[" <a:Comma<ARG>> "]" <e:expr> =>Box::new(AstDec::ASTFunc(id,t,a,e)),
-    "FUN" "REC" <id:ident> <t:TYPE> "[" <a:Comma<ARG>> "]" <e:expr> =>Box::new(AstDec::ASTFuncRec(id,t,a,e)),
+    "(" "deffun" <id:ident>  "(" <a:Comma<ARG>> ")" <t:TYPE> <e:expr> ")" =>Box::new(AstDec::ASTFunc(id,t,a,e)),
+    "(" "deffun" "rec" <id:ident>  "(" <a:Comma<ARG>> ")" <t:TYPE> <e:expr> ")" =>Box::new(AstDec::ASTFuncRec(id,t,a,e)),
     "VAR" <id:ident> <t:TYPE> => Box::new(AstDec::ASTVar(id,t)),
     "PROC" <id:ident> "[" <a:Comma<ARG>> "]" <bl:Block> =>Box::new(AstDec::ASTProc(id,a,bl)),
     "PROC" "REC" <id:ident> "[" <a:Comma<ARG>> "]" <bl:Block> =>Box::new(AstDec::ASTProcRec(id,a,bl)),
 };
 
 pub statement : Box<AstStat> = {
-    "ECHO" <expr> => Box::new(AstStat::ASTEcho(<>)),
+    "(" "print" <expr> ")"=> Box::new(AstStat::ASTEcho(<>)),
     "SET" <l:Lval> <e:expr> => Box::new(AstStat::ASTSet(l,e)),
     "IF" <e:expr> <then:Block> <els:Block> => Box::new(AstStat::ASTIf(e,then,els)),
     "WHILE" <e:expr> <body:Block> => Box::new(AstStat::ASTWhile(e,body)),
