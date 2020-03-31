@@ -13,6 +13,9 @@ use std::process::Command;
 use std::collections::HashMap;
 
 use rum_lib::ast;
+use rum_lib::type_checker;
+use rum_lib::rum_type;
+
 
 fn reader_from_file(filename: &PathBuf) -> BufReader<File> {
     let file = File::open(filename).expect("Impossible to open file.");
@@ -94,14 +97,11 @@ fn test_prog(filename: String, expected: &Vec<i64>) {
 
     let ast = parser_ast.parse(&code);
     let past = ast.expect("Parser failure");
-    let type_checher =past.type_check(&mut HashMap::new()); 
+    let type_checher =rum_type::Type::type_check(&past); 
     print! (" test type check : {:?} " ,type_checher);
 
     println!("AST : {:#?}", past);
-    let type_res = test_type(&past );
-    if !type_res {
-        panic!("Erreur de type");
-    }
+
     let mut mem = rum_lib::eval::Memoire { mem: Vec::new() };
     assert_eq!(*expected, past.eval(&mut HashMap::new(), &mut mem));
     println!("memoire : {:?}", mem);

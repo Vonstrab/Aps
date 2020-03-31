@@ -8,6 +8,8 @@ use crate::rum_type::Type;
 
 use std::collections::HashMap;
 
+
+
 impl AstExp {
     pub fn type_check(&self, type_cache: &HashMap<String, Type>) -> Type {
         println!("\nInto Expr eval");
@@ -160,40 +162,34 @@ impl AstExp {
 }
 
 impl AstDec {
-    pub fn type_check(&self,  type_cache: &mut HashMap<String, Type>) {
+    pub fn type_check(&self, type_cache: &mut HashMap<String, Type>) -> Type {
         use crate::ast::AstDec::*;
 
         match self {
             // ASTProc(x, a, e) => {
-                
             // }
             // ASTProcRec(x, a, e) => {}
-               
             ASTFunc(x, t, a, e) => {
-                
                 let exp_type = e.type_check(type_cache);
 
-
                 if *t == exp_type {
-                    type_cache.insert(x.to_string(), Type::Func(vec!(),Box::new(t.clone())));
+                    type_cache.insert(x.to_string(), Type::Func(vec![], Box::new(t.clone())));
+                    return Type::Void;
                 }
-
+                return Type::TypeError("function declaration is wrong".to_string());
             }
             // ASTFuncRec(x, t, a, e) => {
-               
             // }
 
             // ASTVar(var, t) => {}
-                
-
             ASTConst(var, t, exp) => {
-                
                 let exp_type = exp.type_check(type_cache);
 
                 if *t == exp_type {
                     type_cache.insert(var.to_string(), t.clone());
+                    return Type::Void;
                 }
-
+                return Type::TypeError("const declaration is wrong".to_string());
             }
             _ => panic!("not yet, come back later"),
         }
@@ -201,11 +197,16 @@ impl AstDec {
 }
 
 impl AstStat {
-    pub fn type_check(&self, type_cache: &mut HashMap<String, Type>) {
+    pub fn type_check(&self, type_cache: &mut HashMap<String, Type>) -> Type {
         use crate::ast::AstStat::*;
         match self {
             ASTEcho(e1) => {
-                
+                let exp_type = e1.type_check(type_cache);
+                if  !exp_type.is_err() {
+                    return Type::Void;
+                } else {
+                    return exp_type;
+                }
             }
             // ASTIf(e1, bl1, bl2) => {
             //     let s = format!(
@@ -239,12 +240,11 @@ impl AstStat {
             // }
             _ => panic!("not yet, come back later"),
         }
-      
     }
 }
 
 impl AstCdms {
-    pub fn type_check(&self, type_cache: &mut HashMap<String, Type>) {
+    pub fn type_check(&self, type_cache: &mut HashMap<String, Type>) -> Type {
         use crate::ast::AstCdms::*;
 
         match self {
@@ -258,5 +258,11 @@ impl AstCdms {
                 cs.type_check(type_cache)
             }
         }
+    }
+}
+
+impl Type {
+    pub fn type_check (prog : & AstCdms ) -> Type {
+        prog.type_check(& mut HashMap::new())
     }
 }
