@@ -21,20 +21,14 @@ pub CDMS : Box<AstCdms> = {
 };
 
 pub declaration : Box<AstDec> = {
-    "CONST" <id:ident> <t:TYPE> <e:expr> => Box::new(AstDec::ASTConst(id,t,e)),
+    "(" "let" <id:ident> <t:TYPE> <e:expr> ")" => Box::new(AstDec::ASTConst(id,t,e)),
     "(" "deffun" <id:ident>  "(" <a:Comma<ARG>> ")" <t:TYPE> <e:expr> ")" =>Box::new(AstDec::ASTFunc(id,t,a,e)),
     "(" "deffun" "rec" <id:ident>  "(" <a:Comma<ARG>> ")" <t:TYPE> <e:expr> ")" =>Box::new(AstDec::ASTFuncRec(id,t,a,e)),
-    "VAR" <id:ident> <t:TYPE> => Box::new(AstDec::ASTVar(id,t)),
-    "PROC" <id:ident> "[" <a:Comma<ARG>> "]" <bl:Block> =>Box::new(AstDec::ASTProc(id,a,bl)),
-    "PROC" "REC" <id:ident> "[" <a:Comma<ARG>> "]" <bl:Block> =>Box::new(AstDec::ASTProcRec(id,a,bl)),
+    "(" "let" "mut" <id:ident> <t:TYPE> ")" => Box::new(AstDec::ASTVar(id,t)),    
 };
 
 pub statement : Box<AstStat> = {
-    "(" "print" <expr> ")"=> Box::new(AstStat::ASTEcho(<>)),
-    "SET" <l:Lval> <e:expr> => Box::new(AstStat::ASTSet(l,e)),
-    "IF" <e:expr> <then:Block> <els:Block> => Box::new(AstStat::ASTIf(e,then,els)),
-    "WHILE" <e:expr> <body:Block> => Box::new(AstStat::ASTWhile(e,body)),
-    "CALL" <id:ident> <es:Spaces<expr>> => Box::new(AstStat::ASTCall(id,es))
+    "(" <id:ident> <es:Spaces<expr>> ")"=> Box::new(AstStat::ASTCall(id,es))
 };
 
 pub expr : Box<AstExp> = {
@@ -42,6 +36,7 @@ pub expr : Box<AstExp> = {
     "false"=>Box::new(AstExp::ASTBool(false)),
     <Num> => Box::new(AstExp::ASTInt(<>)),
     <ident> => Box::new(AstExp::ASTIdent(<>)),
+    "(" "print" <expr> ")"=> Box::new(AstStat::ASTEcho(<>)),
     "(" "if" <e1:expr> <then:expr> <el:expr> ")"=> Box::new(AstExp::ASTIf(e1,then,el)),
     "(" "not" <e1:expr> ")" =>  Box::new(AstExp::ASTUnPrim(UnOprim::Not,e1)),
     "(" "and" <e1:expr> <e2:expr> ")" => Box::new(AstExp::ASTBinPrim(Oprim::And,e1,e2)),
@@ -54,20 +49,11 @@ pub expr : Box<AstExp> = {
     "(" "div" <e1:expr> <e2:expr> ")" =>Box::new(AstExp::ASTBinPrim(Oprim::Div,e1,e2)),
     "[" <a:Comma<ARG>>  "]" <expr:expr> =>Box::new(AstExp::ASTAbs(a,expr)),
     "(" <id:ident> <es:Spaces<expr>> ")" =>Box::new(AstExp::ASTApp(id,es)),
-    "(" "len" <e:expr> ")" =>Box::new(AstExp::ASTLen(e)),
-    "(" "alloc" <e:expr> ")" =>Box::new(AstExp::ASTAlloc(e)),
-    "(" "nth" <e1:expr> <e2:expr> ")" =>Box::new(AstExp::ASTNth(e1,e2)),
 };
-
-pub Lval : Lval ={
-    <ident> => Lval::Ident(<>),
-    "(" "nth" <l:Lval> <e:expr> ")" => Lval::Nth(Box::new(l),e),
-}
 
 pub TYPE : Type ={
     <tprim>,
     "(" <args:Asterisk<TYPE>> "->" <ret:TYPE> ")" => Type::Func(args,Box::new(ret)),
-    "vec" <t:TYPE>  => Type::Vector(Box::new(t)),
 };
 
 pub ARG: Arg = { 

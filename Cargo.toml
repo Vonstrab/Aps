@@ -1,6 +1,6 @@
 [package]
 name = "rum"
-version = "3.1.0"
+version = "0.5.0"
 authors = ["Ivan <delgado.ivan@protonmail.com>"]
 edition = "2018"
 
