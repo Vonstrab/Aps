@@ -5,8 +5,6 @@ use std::collections::HashMap;
 #[derive(Clone, PartialEq, Debug)]
 pub enum Value {
     Int(i64),
-    FermetureProc(Box<ast::AstCdms>, Vec<String>, HashMap<String, Value>),
-    FermetureProcRec(Box<ast::AstCdms>, Vec<String>, HashMap<String, Value>),
     Fermeture(Box<ast::AstExp>, Vec<String>, HashMap<String, Value>),
     FermetureRec(Box<ast::AstExp>, Vec<String>, HashMap<String, Value>),
     Adress(usize),
@@ -20,7 +18,7 @@ impl Value {
         use self::Value::*;
         match self {
             Int(i) => *i,
-            Adress(a) => mem.mem[*a].as_int( & mut mem.clone()),
+            Adress(a) => mem.mem[*a].as_int(&mut mem.clone()),
             Any => panic!("variable not initialised"),
             _ => panic!("ERROR as_int "),
         }
@@ -132,47 +130,6 @@ impl ast::AstDec {
             ASTVar(s, _) => {
                 env.insert(s.clone(), mem.alloc());
             }
-
-            ASTProc(fname, a, e) => {
-                let mut args = Vec::new();
-                for arg in a {
-                    args.push(arg.ident.clone());
-                }
-                let fenv = env.clone();
-                env.insert(fname.clone(), Value::FermetureProc(e.clone(), args, fenv));
-            }
-            ASTProcRec(x, a, e) => {
-                let mut args = Vec::new();
-
-                for arg in a {
-                    args.push(arg.ident.clone());
-                }
-
-                let mut fenv = env.clone();
-                let mut ferm = Value::FermetureProcRec(e.clone(), args.clone(), fenv.clone());
-                fenv.insert(x.clone(), ferm.clone());
-                ferm = Value::FermetureProcRec(e.clone(), args.clone(), fenv.clone());
-                env.insert(x.clone(), ferm.clone());
-            }
-        }
-    }
-}
-
-impl ast::Lval {
-    pub fn eval(&self, env: &mut HashMap<String, Value>, mem: &mut Memoire) -> usize {
-        use ast::Lval::*;
-
-        match self {
-            Ident(s) => match env[s] {
-                Value::Adress(adr) => adr,
-                Value::Block(adr, _) => adr,
-                _ => panic!("Lval is not an adress"),
-            },
-            Nth(lval, expr) => {
-                let adr = lval.eval(env, mem);
-                let i = expr.eval(env, mem).as_int(mem) as usize;
-                adr + i
-            }
         }
     }
 }
@@ -188,55 +145,7 @@ impl ast::AstStat {
         let mut flux_sortie: Vec<i64> = Vec::new();
 
         match self {
-            ASTEcho(expr) => {
-                let value = expr.eval(env, mem);
-                flux_sortie.push(value.as_int(mem))
-            }
-            ASTSet(lval, exp) => {
-                let adr = lval.eval(env, mem);
-                let rvalue = exp.eval(env, mem);
-                mem.mem[adr] = rvalue;
-            }
-            ASTIf(e, el, th) => {
-                if e.eval(env, mem).as_int(mem) == 1 {
-                    flux_sortie.append(&mut el.eval(env, mem));
-                } else {
-                    flux_sortie.append(&mut th.eval(env, mem));
-                }
-            }
-            ASTWhile(e, lop) => {
-                while e.eval(env, mem).as_int(mem) == 1 {
-                    flux_sortie.append(&mut lop.eval(env, mem));
-                }
-            }
             ASTCall(s, args) => match &env[s] {
-                Value::FermetureProc(fbody, fargs, fenv) => {
-                    let mut nfenv = env.clone();
-
-                    for (f, value) in fenv {
-                        nfenv.insert(f.clone(), value.clone());
-                    }
-
-                    for i in 0..fargs.len() {
-                        nfenv.insert(fargs[i].clone(), args[i].eval(env, mem));
-                    }
-
-                    flux_sortie.append(&mut fbody.eval(&mut nfenv, mem));
-                }
-
-                Value::FermetureProcRec(fbody, fargs, fenv) => {
-                    let mut nfenv = env.clone();
-
-                    for (f, value) in fenv {
-                        nfenv.insert(f.clone(), value.clone());
-                    }
-
-                    for i in 0..fargs.len() {
-                        nfenv.insert(fargs[i].clone(), args[i].eval(env, mem));
-                    }
-
-                    flux_sortie.append(&mut fbody.eval(&mut nfenv, mem));
-                }
                 _ => panic!("not a proc"),
             },
         }
@@ -265,6 +174,11 @@ impl ast::AstExp {
                 } else {
                     Value::Int(1)
                 }
+            }
+            ASTPrint(e) => {
+                let e_eval = e.eval(env, mem);
+                println!("FLUX SORTIE : {:?} ", e_eval);
+                Value::Any
             }
             ASTBinPrim(op, e1, e2) => {
                 use ast::Oprim;
@@ -336,28 +250,6 @@ impl ast::AstExp {
                 }
                 Value::Fermeture(e.clone(), abs_args, env.clone())
             }
-
-            // rum2
-            ASTAlloc(e) => match e.eval(&env, mem) {
-                Value::Int(n) => mem.allocn(n as usize),
-                _ => panic!(format!(" {:?} is not a Number", e)),
-            },
-            ASTNth(e1, e2) => match e1.eval(&env, mem) {
-                Value::Block(adr, n) => match e2.eval(&env, mem) {
-                    Value::Int(i) => {
-                        if i > n as i64 {
-                            panic!("ASTNTH out of the block");
-                        }
-                        mem.mem[adr + i as usize].clone()
-                    }
-                    _ => panic!(format!(" {:?} is not a Number", e2)),
-                },
-                _ => panic!(format!(" {:?} is not a Block", e1)),
-            },
-            ASTLen(e) => match e.eval(&env, mem) {
-                Value::Block(_, n) => Value::Int(n as i64),
-                _ => panic!(format!(" {:?} is not a Block", e)),
-            },
         }
     }
 }

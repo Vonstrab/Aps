@@ -23,7 +23,7 @@ fn reader_from_file(filename: &PathBuf) -> BufReader<File> {
 }
 
 fn test_type(ast: &ast::AstCdms) -> bool {
-    let mut prolog = ast.to_prolog();
+    let mut prolog = String::new();
     prolog.push('.');
 
     println!("\nOutProlog : {} ", prolog);

@@ -29,6 +29,15 @@ impl AstExp {
                     Type::TypeError(format!("Not primitive function require a boolean argument"))
                 }
             }
+
+            ASTPrint(e1) => {
+                let exp_type = e1.type_check(type_cache);
+                if  !exp_type.is_err() {
+                    return Type::Void;
+                } else {
+                    return exp_type;
+                }
+            }
             ASTBinPrim(op, e1, e2) => {
                 let expr1 = e1.type_check(type_cache);
                 let expr2 = e2.type_check(type_cache);
@@ -125,37 +134,6 @@ impl AstExp {
                 Type::check_fun(func_type, type_args)
             }
 
-            // ASTAbs(args, e) => {
-            //     let mut abs_args = Vec::new();
-
-            //     for arg in args {
-            //         abs_args.push(arg.ident.clone());
-            //     }
-            //     Value::Fermeture(e.clone(), abs_args, env.clone())
-            // }
-
-            // // rum2
-            // ASTAlloc(e) => match e.eval(&env, mem) {
-            //     Value::Int(n) => mem.allocn(n as usize),
-            //     _ => panic!(format!(" {:?} is not a Number", e)),
-            // },
-
-            // ASTNth(e1, e2) => match e1.eval(&env, mem) {
-            //     Value::Block(adr, n) => match e2.eval(&env, mem) {
-            //         Value::Int(i) => {
-            //             if i > n as i64 {
-            //                 panic!("ASTNTH out of the block");
-            //             }
-            //             mem.mem[adr + i as usize].clone()
-            //         }
-            //         _ => panic!(format!(" {:?} is not a Number", e2)),
-            //     },
-            //     _ => panic!(format!(" {:?} is not a Block", e1)),
-            // },
-            // ASTLen(e) => match e.eval(&env, mem) {
-            //     Value::Block(_, n) => Value::Int(n as i64),
-            //     _ => panic!(format!(" {:?} is not a Block", e)),
-            // },
             _ => panic!("not yet, come back later"),
         }
     }
@@ -166,9 +144,7 @@ impl AstDec {
         use crate::ast::AstDec::*;
 
         match self {
-            // ASTProc(x, a, e) => {
-            // }
-            // ASTProcRec(x, a, e) => {}
+          
             ASTFunc(x, t, a, e) => {
                 let exp_type = e.type_check(type_cache);
 
@@ -200,14 +176,7 @@ impl AstStat {
     pub fn type_check(&self, type_cache: &mut HashMap<String, Type>) -> Type {
         use crate::ast::AstStat::*;
         match self {
-            ASTEcho(e1) => {
-                let exp_type = e1.type_check(type_cache);
-                if  !exp_type.is_err() {
-                    return Type::Void;
-                } else {
-                    return exp_type;
-                }
-            }
+           
             // ASTIf(e1, bl1, bl2) => {
             //     let s = format!(
             //         "stat( statIf( {} , {} , {} ) )",
