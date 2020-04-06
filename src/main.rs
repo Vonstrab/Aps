@@ -5,17 +5,18 @@ extern crate rum_lib;
 lalrpop_mod!(pub rum);
 
 use std::fs::File;
+use std::fs::{self, DirEntry};
 use std::io::prelude::*;
 use std::io::BufReader;
+use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
 
 use std::collections::HashMap;
 
 use rum_lib::ast;
-use rum_lib::type_checker;
 use rum_lib::rum_type;
-
+use rum_lib::type_checker;
 
 fn reader_from_file(filename: &PathBuf) -> BufReader<File> {
     let file = File::open(filename).expect("Impossible to open file.");
@@ -84,280 +85,65 @@ fn main() {
 }
 
 #[allow(dead_code)]
-fn test_prog(filename: String, expected: &Vec<i64>) {
+
+fn test_folder(folder: &PathBuf) {
+    if folder.is_dir() {
+        let fichiers_test = fs::read_dir(folder)
+            .expect("Folder not found")
+            .filter_map(|entry| {
+                let entry_path = entry.expect("IO Error").path();
+                if !entry_path.is_dir()
+                    && entry_path.extension().unwrap_or_default().to_str().unwrap() == "rum"
+                {
+                    Some(entry_path)
+                } else {
+                    None
+                }
+            });
+
+        fichiers_test.map(|fichier| test_prog(&fichier));
+    }
+}
+
+fn test_prog(filename: &PathBuf) {
     let parser_ast = rum::ProgParser::new();
 
-    let d = PathBuf::from(filename);
-    dbg!("Parse file : {:?}", &d);
-
-    let mut code_reader = reader_from_file(&d);
+    let code_path = PathBuf::from(filename);
     let mut code: String = String::new();
-    let _ = code_reader.read_to_string(&mut code);
+    reader_from_file(&code_path)
+        .read_to_string(&mut code)
+        .expect("Error reading code file");
+
+    let mut output_path = PathBuf::from(filename);
+    output_path.set_extension("out");
+    let mut output: String = String::new();
+    reader_from_file(&output_path)
+        .read_to_string(&mut output)
+        .expect("Error reading output file");
+
+    let mut result_path = PathBuf::from(filename);
+    result_path.set_extension("result");
+    let mut result: String = String::new();
+    reader_from_file(&result_path)
+        .read_to_string(&mut result)
+        .expect("Error reading output file");
+
     println!("Code :\n{}", code);
+    println!("Expected result :\n{}", result);
+    println!("Expected output :\n{}", output);
 
-    let ast = parser_ast.parse(&code);
-    let past = ast.expect("Parser failure");
-    let type_checher =rum_type::Type::type_check(&past); 
-    print! (" test type check : {:?} " ,type_checher);
+    let ast = parser_ast.parse(&code).expect("Parser failure");
+    let type_checher = rum_type::Type::type_check(&ast);
+    print!(" test type check : {:?} ", type_checher);
 
-    println!("AST : {:#?}", past);
+    println!("AST : {:#?}", ast);
 
     let mut mem = rum_lib::eval::Memoire { mem: Vec::new() };
-    assert_eq!(*expected, past.eval(&mut HashMap::new(), &mut mem));
+    let evalued = ast.eval(&mut HashMap::new(), &mut mem);
     println!("memoire : {:?}", mem);
 }
 
-#[cfg(test)]
-mod rum0 {
-
-    use super::*;
-    extern crate rum_lib;
-
-    #[test]
-    fn prog_000() {
-        test_prog("test/rum0/prog000.rum".to_string(), &vec![42]);
-    }
-
-    #[test]
-    fn prog_001() {
-        test_prog("test/rum0/prog001.rum".to_string(), &vec![42]);
-    }
-
-    #[test]
-    fn prog_002() {
-        test_prog("test/rum0/prog002.rum".to_string(), &vec![42]);
-    }
-
-    #[test]
-    fn prog_003() {
-        test_prog("test/rum0/prog003.rum".to_string(), &vec![42]);
-    }
-
-    // #[test]
-    // fn prog_004() {
-    //     test_prog("test/rum0/prog004.rum".to_string(), &vec![42]);
-    // }
-
-    // #[test]
-    // fn prog_005() {
-    //     test_prog("test/rum0/prog005.rum".to_string(), &vec![42]);
-    // }
-
-    // #[test]
-    // fn prog_006() {
-    //     test_prog("test/rum0/prog006.rum".to_string(), &vec![42]);
-    // }
-
-    // #[test]
-    // fn prog_007() {
-    //     test_prog("test/rum0/prog007.rum".to_string(), &vec![42]);
-    // }
-
-    // #[test]
-    // fn prog_008() {
-    //     test_prog("test/rum0/prog008.rum".to_string(), &vec![42]);
-    // }
-
-    // #[test]
-    // fn prog_009() {
-    //     test_prog("test/rum0/prog009.rum".to_string(), &vec![42]);
-    // }
-
-    // #[test]
-    // fn prog_010() {
-    //     test_prog("test/rum0/prog010.rum".to_string(), &vec![42]);
-    // }
-
-    // #[test]
-    // fn prog_011() {
-    //     test_prog("test/rum0/prog011.rum".to_string(), &vec![42]);
-    // }
-
-    // #[test]
-    // fn prog_012() {
-    //     test_prog("test/rum0/prog012.rum".to_string(), &vec![42]);
-    // }
-
-    // #[test]
-    // fn prog_013() {
-    //     test_prog("test/rum0/prog013.rum".to_string(), &vec![42]);
-    // }
-
-    // #[test]
-    // fn prog_014() {
-    //     test_prog("test/rum0/prog014.rum".to_string(), &vec![42]);
-    // }
-
-    // #[test]
-    // fn prog_015() {
-    //     test_prog("test/rum0/prog015.rum".to_string(), &vec![42]);
-    // }
-
-    // #[test]
-    // fn prog_016() {
-    //     test_prog("test/rum0/prog016.rum".to_string(), &vec![42]);
-    // }
-
-    // #[test]
-    // fn prog_017() {
-    //     test_prog("test/rum0/prog017.rum".to_string(), &vec![42]);
-    // }
+#[test]
+fn rum0() {
+    test_folder(&PathBuf::from("test/rum0"));
 }
-
-// #[cfg(test)]
-// mod rum1 {
-
-//     use super::*;
-//     extern crate rum_lib;
-
-//     #[test]
-//     fn prog_100() {
-//         test_prog("test/rum1/prog100.rum".to_string(), &vec![42]);
-//     }
-
-//     #[test]
-//     fn prog_101() {
-//         test_prog("test/rum1/prog101.rum".to_string(), &vec![42]);
-//     }
-
-//     #[test]
-//     fn prog_102() {
-//         test_prog("test/rum1/prog102.rum".to_string(), &vec![42]);
-//     }
-
-//     #[test]
-//     fn prog_103() {
-//         test_prog("test/rum1/prog103.rum".to_string(), &vec![42]);
-//     }
-//     #[test]
-//     fn prog_104() {
-//         test_prog("test/rum1/prog104.rum".to_string(), &vec![42]);
-//     }
-
-//     #[test]
-//     #[should_panic(expected = "variable not initialised")]
-//     fn prog_105() {
-//         test_prog("test/rum1/prog105.rum".to_string(), &vec![42]);
-//     }
-
-//     #[test]
-//     #[should_panic(expected = "variable not initialised")]
-//     fn prog_106() {
-//         test_prog("test/rum1/prog106.rum".to_string(), &vec![42]);
-//     }
-
-//     #[test]
-//     fn prog_107() {
-//         test_prog("test/rum1/prog107.rum".to_string(), &vec![0, 42]);
-//     }
-
-//     #[test]
-//     fn prog_108() {
-//         test_prog("test/rum1/prog108.rum".to_string(), &vec![42, 42]);
-//     }
-
-//     // #[test]
-//     fn prog_109() {
-//         test_prog("test/rum1/prog109.rum".to_string(), &vec![42]);
-//     }
-
-//     #[test]
-//     fn prog_110() {
-//         test_prog("test/rum1/prog110.rum".to_string(), &vec![42]);
-//     }
-
-//     #[test]
-//     fn prog_111() {
-//         test_prog("test/rum1/prog111.rum".to_string(), &vec![42]);
-//     }
-
-//     #[test]
-//     fn prog_112() {
-//         test_prog("test/rum1/prog112.rum".to_string(), &vec![1]);
-//     }
-
-//     #[test]
-//     fn prog_113() {
-//         test_prog("test/rum1/prog113.rum".to_string(), &vec![0]);
-//     }
-
-//     #[test]
-//     fn prog_114() {
-//         test_prog("test/rum1/prog114.rum".to_string(), &vec![1]);
-//     }
-
-//     #[test]
-//     fn prog_115() {
-//         test_prog("test/rum1/prog115.rum".to_string(), &vec![41, 42]);
-//     }
-
-//     #[test]
-//     fn prog_116() {
-//         test_prog("test/rum1/prog116.rum".to_string(), &vec![21, 42]);
-//     }
-
-//     #[test]
-//     fn prog_117() {
-//         test_prog("test/rum1/prog117.rum".to_string(), &vec![42]);
-//     }
-
-//     #[test]
-//     fn prog_118() {
-//         test_prog("test/rum1/prog118.rum".to_string(), &vec![42]);
-//     }
-
-//     #[test]
-//     fn prog_119() {
-//         test_prog("test/rum1/prog119.rum".to_string(), &vec![0, 42]);
-//     }
-
-//     #[test]
-//     fn prog_120() {
-//         test_prog("test/rum1/prog120.rum".to_string(), &vec![0, 42]);
-//     }
-// }
-// #[cfg(test)]
-// mod rum2 {
-
-//     use super::*;
-//     extern crate rum_lib;
-
-//     #[test]
-//     fn prog_200() {
-//         test_prog("test/rum2/prog200.rum".to_string(), &vec![1, 2, 3, 4, 5]);
-//     }
-
-//     #[test]
-//     fn prog_201() {
-//         test_prog("test/rum2/prog201.rum".to_string(), &vec![]);
-//     }
-
-//     #[test]
-//     fn prog_202() {
-//         test_prog("test/rum2/prog202.rum".to_string(), &vec![]);
-//     }
-
-//     #[test]
-//     fn prog_203() {
-//         test_prog("test/rum2/prog203.rum".to_string(), &vec![]);
-//     }
-//     #[test]
-//     fn prog_204() {
-//         test_prog("test/rum2/prog204.rum".to_string(), &vec![]);
-//     }
-
-//     #[test]
-//     fn prog_205() {
-//         test_prog("test/rum2/prog205.rum".to_string(), &vec![42]);
-//     }
-
-//     #[test]
-//     fn prog_206() {
-//         test_prog("test/rum2/prog206.rum".to_string(), &vec![42]);
-//     }
-
-//     #[test]
-//     fn prog_207() {
-//         test_prog("test/rum2/prog207.rum".to_string(), &vec![]);
-//     }
-// }
