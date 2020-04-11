@@ -1,4 +1,4 @@
 (
-  CONST x int 42;
+  (let x int 42)
   (print x)
 )

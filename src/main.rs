@@ -5,19 +5,15 @@ extern crate rum_lib;
 lalrpop_mod!(pub rum);
 
 use std::fs::File;
-use std::fs::{self, DirEntry};
+use std::fs::{self};
 use std::io::prelude::*;
 use std::io::BufReader;
-use std::path::Path;
 use std::path::PathBuf;
-use std::process::Command;
 
 use std::collections::HashMap;
 
-use rum_lib::ast;
 use rum_lib::config::Config;
 use rum_lib::rum_type;
-use rum_lib::type_checker;
 
 fn reader_from_file(filename: &PathBuf) -> BufReader<File> {
     let file = File::open(filename).expect("Impossible to open file.");

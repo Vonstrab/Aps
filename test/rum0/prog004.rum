@@ -1,5 +1,5 @@
-[
-  CONST x int 7;
-  CONST y int (mul x 3);
-  ECHO (mul y 2)
-]
+(
+  (let x int 7)
+  (let y int (mul x 3))
+  (print (mul y 2))
+)

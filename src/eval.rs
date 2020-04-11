@@ -153,10 +153,7 @@ impl ast::AstDec {
 
 impl ast::AstExp {
     pub fn eval(&self, env: &HashMap<String, Value>, mem: &mut Memoire, config: &Config) -> Value {
-
-        println!("TEST {}",config.trace);
-        println!("TEST {}",config.debug);
-        println!("TEST {}",config.step_wait);
+ 
 
         if config.trace {
             println!("\nInto Expr eval");

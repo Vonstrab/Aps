@@ -11,15 +11,12 @@ use std::collections::HashMap;
 
 impl AstExp {
     pub fn type_check(&self, type_cache: &HashMap<String, Type>) -> Type {
-        println!("\nInto Expr eval");
-        println!("expr : {:?}", self);
-        println!("type_cache {:?}", type_cache);
 
         use AstExp::*;
 
         match self {
-            ASTInt(n) => Type::Int,
-            ASTBool(b) => Type::Bool,
+            ASTInt(_) => Type::Int,
+            ASTBool(_) => Type::Bool,
             ASTUnPrim(_, exp) => {
                 let exp_type = exp.type_check(type_cache);
                 if exp_type == Type::Bool {

@@ -16,8 +16,8 @@ pub Block: Box<AstCdms> = {
 
 pub CDMS : Box<AstCdms> = {
     <expr> => Box::new(AstCdms::FExp(<>)),
-    <dec:declaration> ";" <cdms:CDMS>=> Box::new( AstCdms::Dec(dec,cdms) ),
-    <exp:expr> ";" <cdms:CDMS>=> Box::new( AstCdms::Exp(exp,cdms) ),
+    <dec:declaration>  <cdms:CDMS>=> Box::new( AstCdms::Dec(dec,cdms) ),
+    <exp:expr>  <cdms:CDMS>=> Box::new( AstCdms::Exp(exp,cdms) ),
 };
 
 pub declaration : Box<AstDec> = {

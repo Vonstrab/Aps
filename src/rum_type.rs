@@ -1,6 +1,6 @@
 use std::fmt::{Error, Formatter};
 
-#[derive(PartialEq,PartialOrd, Clone, Eq, Hash)]
+#[derive(PartialEq, PartialOrd, Clone, Eq, Hash)]
 pub enum Type {
     Int,
     Bool,
@@ -33,14 +33,16 @@ impl Type {
     }
 
     pub fn check_fun(func_type: Type, type_args: Vec<Type>) -> Type {
-        match & func_type {
-            Type::Func(args, retour) => {
-                if args[0] == args[0] {
-                    
-                    return func_type;
-                } else {
-                    return Type::TypeError("la signature correspond pas aux argumements".to_string());
+        match &func_type {
+            Type::Func(args , _ )  => {
+                for i in 0..args.len() {
+                    if args[i] != type_args[i] {
+                        return Type::TypeError(
+                            "la signature correspond pas aux argumements".to_string(),
+                        );
+                    }
                 }
+                return func_type;
             }
             _ => panic!("we expect a function"),
         }
