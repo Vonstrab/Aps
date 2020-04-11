@@ -1,7 +1,6 @@
 use crate::ast::AstCdms;
 use crate::ast::AstDec;
 use crate::ast::AstExp;
-use crate::ast::AstStat;
 use crate::ast::Oprim;
 
 use crate::rum_type::Type;
@@ -172,54 +171,14 @@ impl AstDec {
     }
 }
 
-impl AstStat {
-    pub fn type_check(&self, type_cache: &mut HashMap<String, Type>) -> Type {
-        use crate::ast::AstStat::*;
-        match self {
-           
-            // ASTIf(e1, bl1, bl2) => {
-            //     let s = format!(
-            //         "stat( statIf( {} , {} , {} ) )",
-            //         e1.to_prolog(),
-            //         bl1.to_prolog(),
-            //         bl2.to_prolog()
-            //     );
-            //     out.push_str(s.as_str());
-            // }
-            // ASTWhile(e1, bl) => {
-            //     let s = format!("stat( swhile( {} , {} ) )", e1.to_prolog(), bl.to_prolog(),);
-            //     out.push_str(s.as_str());
-            // }
-            // ASTCall(s, e) => {
-            //     let mut exprs = String::new();
-            //     exprs.push('[');
-            //     for val in e {
-            //         exprs.push_str(val.to_prolog().as_str());
-            //         if val != e.last().unwrap() {
-            //             exprs.push('|');
-            //         }
-            //     }
-            //     exprs.push(']');
-            //     let s = format!("stat( call( {} , {} ) )", s, exprs);
-            //     out.push_str(s.as_str());
-            // }
-            // ASTSet(s, e) => {
-            //     let s = format!("", s.to_prolog(), e.to_prolog());
-            //     out.push_str(s.as_str());
-            // }
-            _ => panic!("not yet, come back later"),
-        }
-    }
-}
-
 impl AstCdms {
     pub fn type_check(&self, type_cache: &mut HashMap<String, Type>) -> Type {
         use crate::ast::AstCdms::*;
 
         match self {
-            FStat(s) => s.type_check(type_cache),
-            Stat(s, cs) => {
-                s.type_check(type_cache);
+            FExp(e) => e.type_check(type_cache),
+            Exp(e, cs) => {
+                e.type_check(type_cache);
                 cs.type_check(type_cache)
             }
             Dec(d, cs) => {

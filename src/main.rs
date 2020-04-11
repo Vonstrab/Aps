@@ -23,29 +23,6 @@ fn reader_from_file(filename: &PathBuf) -> BufReader<File> {
     BufReader::new(file)
 }
 
-fn test_type(ast: &ast::AstCdms) -> bool {
-    let mut prolog = String::new();
-    prolog.push('.');
-
-    println!("\nOutProlog : {} ", prolog);
-
-    let script_prolog = Command::new("./typage.sh")
-        .arg(prolog)
-        .output()
-        .unwrap_or_else(|e| panic!("failed to execute process: {}", e));
-
-    let result = script_prolog.stdout;
-    let mut result_str = String::new();
-
-    for c in result {
-        result_str.push(c as char);
-    }
-
-    result_str.pop();
-
-    result_str.eq("void")
-}
-
 fn main() {
     println!("RUM Version 3");
 
@@ -55,31 +32,29 @@ fn main() {
 
     for (i, arg) in arguments.enumerate() {
         if i != 0 {
-            println!("Parsing prog : {}", arg);
-
-            let path = PathBuf::from(arg.as_str());
-
-            let mut code_reader = reader_from_file(&path);
+            let code_path = PathBuf::from(&arg);
             let mut code: String = String::new();
-            let _rey = code_reader.read_to_string(&mut code);
+            reader_from_file(&code_path)
+                .read_to_string(&mut code)
+                .expect("Error reading code file");
+
             println!("Code :\n{}", code);
 
-            let ast = parser_ast.parse(&code).unwrap();
+            println!("Parsing prog : {}", arg);
+            let parser_ast = rum::ProgParser::new();
+            let ast = parser_ast.parse(&code).expect("Parser failure");
+            let type_checher = rum_type::Type::type_check(&ast);
             println!("AST : {:#?}", ast);
+        
+            print!(" test type check : {:?} ", type_checher);
+        
+            let mut mem = rum_lib::eval::Memoire { mem: Vec::new() };
 
-            let type_res = test_type(&ast);
+            let evalued = ast.eval(&mut HashMap::new(), &mut mem);
+            
+            println!("memoire : {:?}", mem);
 
-            if !type_res {
-                println!("Fin Du prgramme");
-                println!("Erreur de typage!");
-            } else {
-                println!("Typage Correct!");
-                ast.eval(
-                    &mut HashMap::new(),
-                    &mut rum_lib::eval::Memoire { mem: Vec::new() },
-                );
-                println!("Fin Du prgramme");
-            }
+            println!("Fin Du prgramme");
         }
     }
 }

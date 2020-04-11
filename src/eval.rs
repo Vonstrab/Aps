@@ -76,13 +76,13 @@ impl ast::AstCdms {
                 dec.eval(env, mem);
                 flux_sortie.append(&mut cdms.eval(env, mem));
             }
-            Stat(stat, cdms) => {
-                flux_sortie.append(&mut stat.eval(env, mem));
+            Exp(expr, cdms) => {
+                expr.eval(env, mem);
                 flux_sortie.append(&mut cdms.eval(env, mem));
             }
 
-            FStat(stat) => {
-                flux_sortie.append(&mut stat.eval(env, mem));
+            FExp(expr) => {
+                expr.eval(env, mem);
             }
         }
         flux_sortie
@@ -134,26 +134,7 @@ impl ast::AstDec {
     }
 }
 
-impl ast::AstStat {
-    pub fn eval(&self, env: &mut HashMap<String, Value>, mem: &mut Memoire) -> Vec<i64> {
-        println!("\nInto Stat eval");
-        println!("self {:?}", self);
-        println!("env {:?}", env);
-        println!("mem {:?}", mem);
 
-        use ast::AstStat::*;
-        let mut flux_sortie: Vec<i64> = Vec::new();
-
-        match self {
-            ASTCall(s, args) => match &env[s] {
-                _ => panic!("not a proc"),
-            },
-        }
-
-        println!("FLUX SORTIE : {:?} ", flux_sortie);
-        flux_sortie
-    }
-}
 
 impl ast::AstExp {
     pub fn eval(&self, env: &HashMap<String, Value>, mem: &mut Memoire) -> Value {
@@ -177,7 +158,7 @@ impl ast::AstExp {
             }
             ASTPrint(e) => {
                 let e_eval = e.eval(env, mem);
-                println!("FLUX SORTIE : {:?} ", e_eval);
+                println!("{:?}", e_eval.as_int(mem));
                 Value::Any
             }
             ASTBinPrim(op, e1, e2) => {

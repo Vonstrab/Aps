@@ -57,15 +57,10 @@ pub enum AstDec {
 }
 
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub enum AstStat {
-    ASTCall(String, Vec<Box<AstExp>>),
-}
-
-#[derive(Clone, PartialEq, Eq, Hash)]
 pub enum AstCdms {
-    FStat(Box<AstStat>),
+    FExp(Box<AstExp>),
     Dec(Box<AstDec>, Box<AstCdms>),
-    Stat(Box<AstStat>, Box<AstCdms>),
+    Exp(Box<AstExp>, Box<AstCdms>),
 }
 
 impl std::fmt::Debug for AstExp {
@@ -85,29 +80,21 @@ impl std::fmt::Debug for AstExp {
     }
 }
 
-impl std::fmt::Debug for AstStat {
-    fn fmt(&self, fmt: &mut Formatter) -> Result<(), Error> {
-        use self::AstStat::*;
-        match self {
-            ASTCall(x, exps) => write!(fmt, "ASTCall( {:?} , {:?} )", x, exps),
-        }
-    }
-}
 
 impl std::fmt::Debug for AstDec {
     fn fmt(&self, fmt: &mut Formatter) -> Result<(), Error> {
         use self::AstDec::*;
         match self {
-            ASTConst(s, t, e) => write!(fmt, "ASTConst ( {:?} , {:?} , {:?} )", s, t, e),
+            ASTConst(s, t, e) => write!(fmt, "ASTConst (\n\t{:?},\n\t{:?},\n\t{:?})", s, t, e),
             ASTFunc(id, t, args, e) => {
-                write!(fmt, "ASTFunc ( {:?} , {:?} , {:?} , {:?} )", id, t, args, e)
+                write!(fmt, "ASTFunc (\n\t{:?}\n\t,{:?}\n\t,{:?},\n\t{:?})", id, t, args, e)
             }
             ASTFuncRec(id, t, args, e) => write!(
                 fmt,
-                "ASTFuncRec ( {:?} , {:?} , {:?} , {:?} )",
+                "ASTFuncRec ( \n\t{:?},\n\t{:?},\n\t{:?},\n\t{:?})",
                 id, t, args, e
             ),
-            ASTVar(x, t) => write!(fmt, "ASTVar ( {:?} ,{:?} )", x, t),
+            ASTVar(x, t) => write!(fmt, "ASTVar (\n\t{:?}\n\t,{:?})", x, t),
         }
     }
 }
@@ -116,9 +103,9 @@ impl std::fmt::Debug for AstCdms {
     fn fmt(&self, fmt: &mut Formatter) -> Result<(), Error> {
         use self::AstCdms::*;
         match self {
-            Stat(s, cs) => write!(fmt, "ASTCMDS {:?}, {:?}", s, cs),
-            Dec(d, cs) => write!(fmt, "ASTCMDS {:?}, {:?}", d, cs),
-            FStat(s) => write!(fmt, "FSTAT( {:?} )", s),
+            Exp(s, cs) => write!(fmt, "ASTCMDS \n\t{:?}\n\t,{:?}", s, cs),
+            Dec(d, cs) => write!(fmt, "ASTCMDS \n\t{:?}\n\t,{:?}", d, cs),
+            FExp(s) => write!(fmt, "FSTAT(\n\t{:?})", s),
         }
     }
 }

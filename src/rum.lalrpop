@@ -15,9 +15,9 @@ pub Block: Box<AstCdms> = {
 };
 
 pub CDMS : Box<AstCdms> = {
-    <statement> => Box::new(AstCdms::FStat(<>)),
+    <expr> => Box::new(AstCdms::FExp(<>)),
     <dec:declaration> ";" <cdms:CDMS>=> Box::new( AstCdms::Dec(dec,cdms) ),
-    <st:statement> ";" <cdms:CDMS>=> Box::new( AstCdms::Stat(st,cdms) ),
+    <exp:expr> ";" <cdms:CDMS>=> Box::new( AstCdms::Exp(exp,cdms) ),
 };
 
 pub declaration : Box<AstDec> = {
@@ -25,10 +25,6 @@ pub declaration : Box<AstDec> = {
     "(" "deffun" <id:ident>  "(" <a:Comma<ARG>> ")" <t:TYPE> <e:expr> ")" =>Box::new(AstDec::ASTFunc(id,t,a,e)),
     "(" "deffun" "rec" <id:ident>  "(" <a:Comma<ARG>> ")" <t:TYPE> <e:expr> ")" =>Box::new(AstDec::ASTFuncRec(id,t,a,e)),
     "(" "let" "mut" <id:ident> <t:TYPE> ")" => Box::new(AstDec::ASTVar(id,t)),    
-};
-
-pub statement : Box<AstStat> = {
-    "(" <id:ident> <es:Spaces<expr>> ")"=> Box::new(AstStat::ASTCall(id,es))
 };
 
 pub expr : Box<AstExp> = {
