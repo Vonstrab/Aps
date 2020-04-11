@@ -1,4 +1,5 @@
 use crate::ast;
+use crate::config::Config;
 
 use std::collections::HashMap;
 
@@ -62,45 +63,61 @@ impl Memoire {
 }
 
 impl ast::AstCdms {
-    pub fn eval(&self, env: &mut HashMap<String, Value>, mem: &mut Memoire) -> Vec<i64> {
-        println!("\nInto CDMS eval");
-        println!("self {:?}", self);
-        println!("env {:?}", env);
-        println!("mem {:?}", mem);
+    pub fn eval(
+        &self,
+        env: &mut HashMap<String, Value>,
+        mem: &mut Memoire,
+        config: &Config,
+    ) -> Vec<i64> {
+        if config.trace {
+            println!("\nInto CDMS eval");
+            println!("self {:?}", self);
+            println!("env {:?}", env);
+            println!("mem {:?}", mem);
+        }
 
         use ast::AstCdms::*;
         let mut flux_sortie: Vec<i64> = Vec::new();
 
         match self {
             Dec(dec, cdms) => {
-                dec.eval(env, mem);
-                flux_sortie.append(&mut cdms.eval(env, mem));
+                dec.eval(env, mem, config);
+                flux_sortie.append(&mut cdms.eval(env, mem, config));
             }
             Exp(expr, cdms) => {
-                expr.eval(env, mem);
-                flux_sortie.append(&mut cdms.eval(env, mem));
+                expr.eval(env, mem, config);
+                flux_sortie.append(&mut cdms.eval(env, mem, config));
             }
 
             FExp(expr) => {
-                expr.eval(env, mem);
+                expr.eval(env, mem, config);
             }
+        }
+
+        if config.step_wait > 0 {
+            std::thread::sleep(std::time::Duration::new(
+                0,
+                (config.step_wait as u32) * 1000,
+            ));
         }
         flux_sortie
     }
 }
 
 impl ast::AstDec {
-    pub fn eval(&self, env: &mut HashMap<String, Value>, mem: &mut Memoire) {
-        println!("\nInto DEC eval");
-        println!("self {:?}", self);
-        println!("env {:?}", env);
-        println!("mem {:?}", mem);
+    pub fn eval(&self, env: &mut HashMap<String, Value>, mem: &mut Memoire, config: &Config) {
+        if config.trace {
+            println!("\nInto DEC eval");
+            println!("self {:?}", self);
+            println!("env {:?}", env);
+            println!("mem {:?}", mem);
+        }
 
         use ast::AstDec::*;
 
         match self {
             ASTConst(ident, _, exp) => {
-                env.insert(ident.clone(), exp.eval(&env, mem));
+                env.insert(ident.clone(), exp.eval(&env, mem, config));
                 // println!("On ajoute {} a l'env", ident);
             }
 
@@ -134,14 +151,19 @@ impl ast::AstDec {
     }
 }
 
-
-
 impl ast::AstExp {
-    pub fn eval(&self, env: &HashMap<String, Value>, mem: &mut Memoire) -> Value {
-        println!("\nInto Expr eval");
-        println!("expr : {:?}", self);
-        println!("env {:?}", env);
-        println!("mem {:?}", mem);
+    pub fn eval(&self, env: &HashMap<String, Value>, mem: &mut Memoire, config: &Config) -> Value {
+
+        println!("TEST {}",config.trace);
+        println!("TEST {}",config.debug);
+        println!("TEST {}",config.step_wait);
+
+        if config.trace {
+            println!("\nInto Expr eval");
+            println!("self {:?}", self);
+            println!("env {:?}", env);
+            println!("mem {:?}", mem);
+        }
 
         use ast::AstExp::*;
 
@@ -149,7 +171,7 @@ impl ast::AstExp {
             ASTInt(n) => Value::Int(*n),
             ASTBool(b) => Value::Int(Value::to_int(*b)),
             ASTUnPrim(_, e) => {
-                let exp = e.eval(env, mem);
+                let exp = e.eval(env, mem, config);
                 if exp == Value::Int(1) {
                     Value::Int(0)
                 } else {
@@ -157,15 +179,15 @@ impl ast::AstExp {
                 }
             }
             ASTPrint(e) => {
-                let e_eval = e.eval(env, mem);
+                let e_eval = e.eval(env, mem, config);
                 println!("{:?}", e_eval.as_int(mem));
                 Value::Any
             }
             ASTBinPrim(op, e1, e2) => {
                 use ast::Oprim;
 
-                let expr1 = e1.eval(env, mem).as_int(mem);
-                let expr2 = e2.eval(env, mem).as_int(mem);
+                let expr1 = e1.eval(env, mem, config).as_int(mem);
+                let expr2 = e2.eval(env, mem, config).as_int(mem);
                 match op {
                     Oprim::Add => Value::Int(expr1 + expr2),
                     Oprim::Mul => Value::Int(expr1 * expr2),
@@ -182,10 +204,10 @@ impl ast::AstExp {
                 }
             }
             ASTIf(e1, e2, e3) => {
-                if e1.eval(env, mem).as_int(mem) == 1 {
-                    e2.eval(env, mem)
+                if e1.eval(env, mem, config).as_int(mem) == 1 {
+                    e2.eval(env, mem, config)
                 } else {
-                    e3.eval(env, mem)
+                    e3.eval(env, mem, config)
                 }
             }
 
@@ -206,18 +228,18 @@ impl ast::AstExp {
                     }
 
                     for i in 0..fargs.len() {
-                        nfenv.insert(fargs[i].clone(), args[i].eval(env, mem));
+                        nfenv.insert(fargs[i].clone(), args[i].eval(env, mem, config));
                     }
 
-                    fbody.eval(&nfenv, mem)
+                    fbody.eval(&nfenv, mem, config)
                 }
 
                 Value::FermetureRec(fbody, fargs, fenv) => {
                     let mut nfenv = fenv.clone();
                     for i in 0..fargs.len() {
-                        nfenv.insert(fargs[i].clone(), args[i].eval(env, mem));
+                        nfenv.insert(fargs[i].clone(), args[i].eval(env, mem, config));
                     }
-                    fbody.eval(&nfenv, mem)
+                    fbody.eval(&nfenv, mem, config)
                 }
 
                 _ => panic!("not a fermeture"),

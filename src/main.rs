@@ -15,6 +15,7 @@ use std::process::Command;
 use std::collections::HashMap;
 
 use rum_lib::ast;
+use rum_lib::config::Config;
 use rum_lib::rum_type;
 use rum_lib::type_checker;
 
@@ -24,7 +25,11 @@ fn reader_from_file(filename: &PathBuf) -> BufReader<File> {
 }
 
 fn main() {
-    println!("RUM Version 3");
+    let config = Config::new();
+
+    if config.debug {
+        println!("RUM Version 0.5");
+    }
 
     let parser_ast = rum::ProgParser::new();
 
@@ -37,24 +42,24 @@ fn main() {
             reader_from_file(&code_path)
                 .read_to_string(&mut code)
                 .expect("Error reading code file");
-
-            println!("Code :\n{}", code);
-
-            println!("Parsing prog : {}", arg);
+            if config.debug {
+                println!("Code :\n{}", code);
+                println!("Parsing prog : {}", arg);
+            }
             let parser_ast = rum::ProgParser::new();
             let ast = parser_ast.parse(&code).expect("Parser failure");
             let type_checher = rum_type::Type::type_check(&ast);
-            println!("AST : {:#?}", ast);
-        
-            print!(" test type check : {:?} ", type_checher);
-        
+            if config.debug {
+                println!("AST : {:#?}", ast);
+                print!(" test type check : {:?} ", type_checher);
+            }
             let mut mem = rum_lib::eval::Memoire { mem: Vec::new() };
 
-            let evalued = ast.eval(&mut HashMap::new(), &mut mem);
-            
-            println!("memoire : {:?}", mem);
-
-            println!("Fin Du prgramme");
+            let evalued = ast.eval(&mut HashMap::new(), &mut mem, &config);
+            if config.debug {
+                println!("memoire : {:?}", mem);
+                println!("Fin Du prgramme");
+            }
         }
     }
 }
@@ -81,6 +86,7 @@ fn test_folder(folder: &PathBuf) {
 }
 
 fn test_prog(filename: &PathBuf) {
+    let config = Config::new();
     let parser_ast = rum::ProgParser::new();
 
     let code_path = PathBuf::from(filename);
@@ -114,7 +120,7 @@ fn test_prog(filename: &PathBuf) {
     println!("AST : {:#?}", ast);
 
     let mut mem = rum_lib::eval::Memoire { mem: Vec::new() };
-    let evalued = ast.eval(&mut HashMap::new(), &mut mem);
+    let evalued = ast.eval(&mut HashMap::new(), &mut mem, &config);
     println!("memoire : {:?}", mem);
 }
 
