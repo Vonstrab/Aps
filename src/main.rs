@@ -24,10 +24,8 @@ fn main() {
     let config = Config::new();
 
     if config.debug {
-        println!("RUM Version 0.5");
+        println!("RUM Version 0.6");
     }
-
-    let parser_ast = rum::ProgParser::new();
 
     let arguments = std::env::args();
 

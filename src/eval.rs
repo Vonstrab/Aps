@@ -146,7 +146,8 @@ impl ast::AstDec {
 
             ASTVar(s, _) => {
                 env.insert(s.clone(), mem.alloc());
-            }
+            },
+            Error => panic!("Error in eval")
         }
     }
 }
@@ -249,7 +250,9 @@ impl ast::AstExp {
                     abs_args.push(arg.ident.clone());
                 }
                 Value::Fermeture(e.clone(), abs_args, env.clone())
-            }
+            },
+            Error => panic!("Error in eval")
+
         }
     }
 }

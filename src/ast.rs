@@ -46,6 +46,7 @@ pub enum AstExp {
     ASTBinPrim(Oprim, Box<AstExp>, Box<AstExp>),
     ASTApp(String, Vec<Box<AstExp>>),
     ASTAbs(Vec<Arg>, Box<AstExp>),
+    Error,
 }
 
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -54,6 +55,7 @@ pub enum AstDec {
     ASTFunc(String, Type, Vec<Arg>, Box<AstExp>),
     ASTFuncRec(String, Type, Vec<Arg>, Box<AstExp>),
     ASTVar(String, Type),
+    Error,
 }
 
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -76,25 +78,28 @@ impl std::fmt::Debug for AstExp {
             ASTApp(x, e1) => write!(fmt, "ASTApp( {:?} ,{:?})", x, e1),
             ASTIf(e1, e2, e3) => write!(fmt, "ASTif( {:?} ,{:?}, {:?})", e1, e2, e3),
             ASTIdent(id) => write!(fmt, "ASTIdent( {:?} )", id),
+            Error => write!(fmt, "Error"),
         }
     }
 }
-
 
 impl std::fmt::Debug for AstDec {
     fn fmt(&self, fmt: &mut Formatter) -> Result<(), Error> {
         use self::AstDec::*;
         match self {
             ASTConst(s, t, e) => write!(fmt, "ASTConst (\n\t{:?},\n\t{:?},\n\t{:?})", s, t, e),
-            ASTFunc(id, t, args, e) => {
-                write!(fmt, "ASTFunc (\n\t{:?}\n\t,{:?}\n\t,{:?},\n\t{:?})", id, t, args, e)
-            }
+            ASTFunc(id, t, args, e) => write!(
+                fmt,
+                "ASTFunc (\n\t{:?}\n\t,{:?}\n\t,{:?},\n\t{:?})",
+                id, t, args, e
+            ),
             ASTFuncRec(id, t, args, e) => write!(
                 fmt,
                 "ASTFuncRec ( \n\t{:?},\n\t{:?},\n\t{:?},\n\t{:?})",
                 id, t, args, e
             ),
             ASTVar(x, t) => write!(fmt, "ASTVar (\n\t{:?}\n\t,{:?})", x, t),
+            Error => write!(fmt, "Error"),
         }
     }
 }
