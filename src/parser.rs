@@ -1,11 +1,11 @@
-#[macro_use]
+// #[macro_use]
 
-use lalrpop_utils ;
+// use lalrpop_utils ;
 
-lalrpop_mod!(pub rum);
+// lalrpop_mod!(pub rum);
 
 
 
-pub fn parse(code : &String)->(){
+// pub fn parse(code : &String)->(){
 
-}
+// }
