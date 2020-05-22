@@ -1,0 +1,4 @@
+(
+    (deffun myadd ( x : int ) int (add x 6) )
+    (print (myadd 6))
+)

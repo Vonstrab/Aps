@@ -1,0 +1,4 @@
+(
+    (deffun myadd ( x : int, y : int ) int (add x y) )
+    (print (myadd 6 , 5 ))
+)

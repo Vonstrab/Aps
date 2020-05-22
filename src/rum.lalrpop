@@ -44,7 +44,7 @@ pub expr : Box<AstExp> = {
     "(" "mul" <e1:expr> <e2:expr> ")" =>Box::new(AstExp::ASTBinPrim(Oprim::Mul,e1,e2)),
     "(" "div" <e1:expr> <e2:expr> ")" =>Box::new(AstExp::ASTBinPrim(Oprim::Div,e1,e2)),
     "[" <a:Comma<ARG>>  "]" <expr:expr> =>Box::new(AstExp::ASTAbs(a,expr)),
-    "(" <id:ident> <es:Spaces<expr>> ")" =>Box::new(AstExp::ASTApp(id,es)),
+    "(" <id:ident> <es:Comma<expr>> ")" =>Box::new(AstExp::ASTApp(id,es)),
 };
 
 pub TYPE : Type ={

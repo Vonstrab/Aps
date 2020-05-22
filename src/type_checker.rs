@@ -101,6 +101,7 @@ impl AstExp {
                     }
                 }
             }
+
             ASTIf(condition, then, _else) => {
                 let type_condition = condition.type_check(type_cache);
                 let type_then = then.type_check(type_cache);
@@ -141,13 +142,21 @@ impl AstDec {
 
         match self {
           
-            ASTFunc(x, t, a, e) => {
-                let exp_type = e.type_check(type_cache);
+            ASTFunc(name , fn_type, args, expr) => {
+                
+                for arg in args {
+                
+                    type_cache.insert(arg.ident.clone(), arg.id_type.clone());
+                    
+                }
 
-                if *t == exp_type {
-                    type_cache.insert(x.to_string(), Type::Func(vec![], Box::new(t.clone())));
+                let exp_type = expr.type_check(type_cache);
+
+                if *fn_type == exp_type {
+                    type_cache.insert(name.to_string(), Type::Func(vec![], Box::new(fn_type.clone())));
                     return Type::Void;
                 }
+
                 return Type::TypeError("function declaration is wrong".to_string());
             }
             // ASTFuncRec(x, t, a, e) => {

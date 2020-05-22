@@ -75,7 +75,9 @@ fn test_folder(folder: &PathBuf) {
                 }
             });
 
-        fichiers_test.map(|fichier| test_prog(&fichier));
+            for fichier in fichiers_test{
+                test_prog(&fichier)
+            }
     }
 }
 
@@ -89,23 +91,7 @@ fn test_prog(filename: &PathBuf) {
         .read_to_string(&mut code)
         .expect("Error reading code file");
 
-    let mut output_path = PathBuf::from(filename);
-    output_path.set_extension("out");
-    let mut output: String = String::new();
-    reader_from_file(&output_path)
-        .read_to_string(&mut output)
-        .expect("Error reading output file");
-
-    let mut result_path = PathBuf::from(filename);
-    result_path.set_extension("result");
-    let mut result: String = String::new();
-    reader_from_file(&result_path)
-        .read_to_string(&mut result)
-        .expect("Error reading output file");
-
     println!("Code :\n{}", code);
-    println!("Expected result :\n{}", result);
-    println!("Expected output :\n{}", output);
 
     let ast = parser_ast.parse(&code).expect("Parser failure");
     let type_checher = rum_type::Type::type_check(&ast);
