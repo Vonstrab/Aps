@@ -1,2 +1,2 @@
 # rum
-Rum : functional language implemented in rust
+Rum : toy functional language implemented in rust
